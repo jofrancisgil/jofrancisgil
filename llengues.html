@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Llengües - Jo Recursos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600&family=Inter:wght@300;400;600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .brand-font { font-family: 'Fredoka', sans-serif; }
+        .hidden-lang { display: none; }
+        .hidden-app { display: none !important; }
+
+        /* Estils App Verbs */
+        .verb-app-wrapper {
+            --union-blue: #012169; --union-red: #C8102E; --bg-gradient: linear-gradient(135deg, #f0f4f8 0%, #dbeafe 100%); --radius: 16px;
+            font-family: 'Poppins', sans-serif; background: var(--bg-gradient); padding: 20px; border-radius: var(--radius);
+            box-shadow: 0 10px 25px -5px rgba(1, 33, 105, 0.15); border-top: 8px solid var(--union-red); text-align: center; margin-top: 20px;
+        }
+        .verb-app-wrapper h1 { font-family: 'Poppins', sans-serif; color: var(--union-blue); margin: 0 0 10px 0; font-size: 2rem; font-weight: 700; }
+        .verb-app-wrapper select { padding: 12px; border-radius: 12px; border: 2px solid #e5e7eb; margin-bottom: 20px; display: inline-block; }
+        .verb-app-wrapper button.app-btn { padding: 14px 28px; font-weight: 600; border-radius: 12px; cursor: pointer; transition: 0.2s; }
+        .verb-app-wrapper .btn-primary { background: var(--union-blue); color: white; }
+        .verb-app-wrapper .btn-secondary { background: white; border: 2px solid #e5e7eb; color: #6b7280; }
+        .verb-app-wrapper table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 12px; overflow: hidden; }
+        .verb-app-wrapper th { background: var(--union-blue); color: white; padding: 12px; }
+        .verb-app-wrapper td { padding: 12px; border-bottom: 1px solid #f3f4f6; }
+        .verb-app-wrapper input { padding: 8px; border: 2px solid #e5e7eb; border-radius: 8px; text-align: center; width: 100%; }
+        .verb-app-wrapper .correct-input { border-color: #10b981; background: #ecfdf5; }
+        .verb-app-wrapper .wrong-input { border-color: #dc2626; background: #fef2f2; }
+        .verb-app-wrapper .screen { display: none; }
+        .verb-app-wrapper .active { display: block; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 flex justify-between h-20 items-center">
+            <a href="index.html" class="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition">
+                <i class="fas fa-arrow-left"></i> Tornar a l'Inici
+            </a>
+            <span class="text-2xl font-bold text-blue-900 brand-font">Secció Llengües</span>
+        </div>
+    </nav>
+
+    <main class="flex-grow py-12">
+        <!-- Menú Pestanyes -->
+        <div class="max-w-6xl mx-auto px-4 mb-10 text-center">
+            <div class="inline-flex bg-white p-1 rounded-full shadow-sm border">
+                <button onclick="showLanguage('cat')" id="btn-cat" class="px-6 py-2 rounded-full font-bold transition bg-blue-600 text-white">Català</button>
+                <button onclick="showLanguage('esp')" id="btn-esp" class="px-6 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-50 transition">Castellano</button>
+                <button onclick="showLanguage('eng')" id="btn-eng" class="px-6 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-50 transition">English</button>
+            </div>
+        </div>
+
+        <!-- CATALÀ -->
+        <div id="content-cat" class="lang-content max-w-6xl mx-auto px-4">
+            <div class="flex items-center gap-3 mb-8 pb-2 border-b">
+                <div class="w-2 h-8 bg-yellow-500 rounded-full"></div>
+                <h3 class="text-2xl font-bold text-gray-800">Recursos de Català</h3>
+            </div>
+            <p class="text-gray-500">Materials de gramàtica i lectura pròximament.</p>
+        </div>
+
+        <!-- CASTELLANO -->
+        <div id="content-esp" class="lang-content max-w-6xl mx-auto px-4 hidden-lang">
+            <div class="flex items-center gap-3 mb-8 pb-2 border-b">
+                <div class="w-2 h-8 bg-red-500 rounded-full"></div>
+                <h3 class="text-2xl font-bold text-gray-800">Recursos de Castellano</h3>
+            </div>
+            <p class="text-gray-500">Recursos de lengua castellana próximamente.</p>
+        </div>
+
+        <!-- ENGLISH -->
+        <div id="content-eng" class="lang-content max-w-6xl mx-auto px-4 hidden-lang">
+            <div id="eng-resources-list">
+                <div class="flex items-center gap-3 mb-8 pb-2 border-b">
+                    <div class="w-2 h-8 bg-blue-800 rounded-full"></div>
+                    <h3 class="text-2xl font-bold text-gray-800">English Resources</h3>
+                </div>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-blue-200 ring-2 ring-blue-50">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Grammar</span>
+                            <i class="fas fa-gamepad text-purple-600 text-xl"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">Irregular Verbs Master</h4>
+                        <p class="text-gray-600 text-sm mb-4">Interactive test to practice irregular verbs. UK Edition.</p>
+                        <button onclick="openVerbApp()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-md">Start Test 🚀</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- APP VERBS EMBEGIDA -->
+            <div id="irregular-verbs-app" class="verb-app-wrapper hidden-app">
+                <div id="setup-screen" class="screen active">
+                    <div class="text-6xl mb-4">🇬🇧</div><h1>Irregular Verbs</h1><p>Select number of verbs:</p>
+                    <select id="verb-count"><option value="5">5 Verbs</option><option value="10" selected>10 Verbs</option><option value="20">20 Verbs</option></select><br>
+                    <button class="app-btn btn-primary" onclick="startVerbGame()">Start Practice 🚀</button><br><br>
+                    <button class="app-btn btn-secondary" onclick="closeVerbApp()">Back to Resources</button>
+                </div>
+                <div id="game-screen" class="screen">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><h3 style="margin:0">Fill in the blanks</h3><button class="app-btn btn-secondary" onclick="closeVerbApp()">Quit</button></div>
+                    <div id="game-table-slot" style="overflow-x:auto;"></div><br>
+                    <button class="app-btn btn-primary" onclick="checkVerbAnswers()">Check Answers ✨</button>
+                </div>
+                <div id="result-screen" class="screen">
+                    <h2>Session Complete!</h2><div class="text-4xl font-bold text-blue-900 my-4" id="score-number">0%</div>
+                    <p id="score-message"></p><button class="app-btn btn-primary" onclick="resetVerbGame()">Start New Game 🔄</button>
+                    <button class="app-btn btn-secondary" onclick="closeVerbApp()" style="margin-left:10px;">Exit</button>
+                    <div id="review-table-slot" style="overflow-x:auto; margin-top:30px;"></div>
+                </div>
+                <div style="display:none;"><div id="main-table-wrapper"><table id="quiz-table"><thead><tr><th>Infinitive</th><th>Past Simple</th><th>Past Participle</th><th>Catalan</th></tr></thead><tbody id="quiz-body"></tbody></table></div></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Navegació Pestanyes
+        function showLanguage(langId) {
+            document.querySelectorAll('.lang-content').forEach(el => el.classList.add('hidden-lang'));
+            document.getElementById('content-' + langId).classList.remove('hidden-lang');
+            
+            // Reset botons
+            ['cat','esp','eng'].forEach(id => {
+                const btn = document.getElementById('btn-'+id);
+                if(id === langId) {
+                    btn.className = "px-6 py-2 rounded-full font-bold transition bg-blue-600 text-white";
+                } else {
+                    btn.className = "px-6 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-50 transition";
+                }
+            });
+        }
+
+        // Lògica App Verbs
+        function openVerbApp() { document.getElementById('eng-resources-list').style.display = 'none'; document.getElementById('irregular-verbs-app').classList.remove('hidden-app'); resetVerbGame(); }
+        function closeVerbApp() { document.getElementById('irregular-verbs-app').classList.add('hidden-app'); document.getElementById('eng-resources-list').style.display = 'block'; }
+        
+        const verbsDB = [{i:"be",p1:"was/were",p2:"been",c:"ser/estar"},{i:"begin",p1:"began",p2:"begun",c:"començar"},{i:"break",p1:"broke",p2:"broken",c:"trencar"},{i:"buy",p1:"bought",p2:"bought",c:"comprar"},{i:"come",p1:"came",p2:"come",c:"venir"},{i:"do",p1:"did",p2:"done",c:"fer"},{i:"drink",p1:"drank",p2:"drunk",c:"beure"},{i:"eat",p1:"ate",p2:"eaten",c:"menjar"},{i:"go",p1:"went",p2:"gone",c:"anar"},{i:"have",p1:"had",p2:"had",c:"tenir"},{i:"know",p1:"knew",p2:"known",c:"saber"},{i:"make",p1:"made",p2:"made",c:"fer"},{i:"read",p1:"read",p2:"read",c:"llegir"},{i:"run",p1:"ran",p2:"run",c:"córrer"},{i:"see",p1:"saw",p2:"seen",c:"veure"},{i:"speak",p1:"spoke",p2:"spoken",c:"parlar"},{i:"write",p1:"wrote",p2:"written",c:"escriure"}];
+        let currentSelection=[];
+        function shuffle(a){let c=a.length,r;while(c!=0){r=Math.floor(Math.random()*c);c--;[a[c],a[r]]=[a[r],a[c]];}return a;}
+        function clean(s){return s.trim().toLowerCase();}
+        function showAppScreen(id){document.querySelectorAll('#irregular-verbs-app .screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+        function startVerbGame(){
+            const count=parseInt(document.getElementById('verb-count').value);
+            currentSelection=shuffle([...verbsDB]).slice(0,count);
+            const tbody=document.getElementById('quiz-body');tbody.innerHTML='';
+            currentSelection.forEach((v,ix)=>{
+                const tr=document.createElement('tr');
+                const g=Math.floor(Math.random()*4);
+                const d=[v.i,v.p1,v.p2,v.c];
+                for(let i=0;i<4;i++) tr.innerHTML+=i===g?`<td><span class="static-text py-1 px-3 bg-blue-50 text-blue-800 rounded-full text-sm font-bold">${d[i]}</span></td>`:`<td><input type="text" data-r="${ix}" data-c="${i}"></td>`;
+                tbody.appendChild(tr);
+            });
+            document.getElementById('game-table-slot').appendChild(document.getElementById('main-table-wrapper'));
+            showAppScreen('game-screen');
+        }
+        function checkVerbAnswers(){
+            let sc=0,tot=0;
+            document.querySelectorAll('#quiz-body input').forEach(inp=>{
+                tot++;
+                const r=inp.getAttribute('data-r'), c=inp.getAttribute('data-c');
+                const v=currentSelection[r], d=[v.i,v.p1,v.p2,v.c];
+                const u=clean(inp.value), ans=clean(d[c]);
+                const ok=(ans.split('/').includes(u)||u===ans)&&u!=='';
+                inp.className=ok?'correct-input':'wrong-input';
+                if(ok)sc++; else {const sp=document.createElement('span');sp.className='block text-red-600 text-xs font-bold mt-1';sp.innerText=d[c];inp.parentNode.appendChild(sp);}
+            });
+            document.getElementById('score-number').innerText=Math.round((sc/tot)*100)+'%';
+            document.getElementById('review-table-slot').appendChild(document.getElementById('main-table-wrapper'));
+            showAppScreen('result-screen');
+        }
+        function resetVerbGame(){showAppScreen('setup-screen');document.getElementById('quiz-body').innerHTML='';}
+    </script>
+</body>
+</html>
