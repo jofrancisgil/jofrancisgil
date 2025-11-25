@@ -2,26 +2,292 @@
 <html lang="ca">
 <head>
     <meta charset="UTF-8">
-    <title>Matemàtiques - Jo Recursos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Fitxes de Càlcul - Jo Recursos</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Inter', sans-serif; } .brand-font { font-family: 'Fredoka', sans-serif; }</style>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2 { font-family: 'Fredoka', sans-serif; }
+        .font-hand { font-family: 'Fredoka', sans-serif; }
+
+        /* Estils per a les operacions verticals */
+        .calc-container {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.5rem;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: flex-end;
+            line-height: 1.2;
+            padding: 1rem;
+            position: relative; 
+        }
+        
+        .calc-operator {
+            position: absolute;
+            left: 0.5rem;
+            top: 2.8rem;
+            font-weight: bold;
+        }
+
+        .calc-line {
+            width: 100%;
+            border-bottom: 2px solid black;
+            margin-top: 0.2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Estil per a la divisió */
+        .division-container {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+        }
+        .divisor-box {
+            border-left: 2px solid black;
+            border-bottom: 2px solid black;
+            padding-left: 0.5rem;
+            padding-bottom: 0.2rem;
+            min-width: 3rem;
+        }
+
+        /* CONFIGURACIÓ D'IMPRESSIÓ */
+        @media print {
+            @page { margin: 1.5cm; }
+            body { background: white; color: black; padding: 0; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            #operationsGrid {
+                display: grid !important;
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 2cm 1cm !important;
+                width: 100% !important;
+            }
+            .calc-container, .division-container { font-size: 14pt; page-break-inside: avoid; width: 100%; align-items: flex-end; }
+            .division-container { justify-content: center; }
+        }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
-    <nav class="bg-white shadow-md sticky top-0 z-50">
+<body class="bg-emerald-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Barra de Navegació (No s'imprimeix) -->
+    <nav class="bg-white shadow-md sticky top-0 z-50 no-print">
         <div class="max-w-7xl mx-auto px-4 flex justify-between h-20 items-center">
-            <a href="index.html" class="flex items-center gap-2 text-gray-600 hover:text-emerald-600 transition">
-                <i class="fas fa-arrow-left"></i> Tornar a l'Inici
+            <a href="matematiques.html" class="flex items-center gap-2 text-gray-600 hover:text-emerald-600 transition">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i> Tornar a Mates
             </a>
-            <span class="text-2xl font-bold text-emerald-900 brand-font">Matemàtiques</span>
+            <span class="text-2xl font-bold text-emerald-900 font-hand">Generador de Càlcul</span>
         </div>
     </nav>
-    <main class="flex-grow flex items-center justify-center">
-        <div class="text-center text-gray-400">
-            <i class="fas fa-calculator text-6xl mb-4 opacity-50"></i>
-            <p class="text-xl">Pàgina en construcció</p>
+
+    <div class="container mx-auto px-4 py-8 max-w-6xl flex-grow">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- PANELL DE CONFIGURACIÓ (No s'imprimeix) -->
+            <div class="lg:col-span-4 space-y-6 no-print">
+                
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-emerald-100">
+                    <h2 class="font-bold text-lg mb-4 flex items-center gap-2 text-emerald-800">
+                        <i data-lucide="settings-2" class="w-5 h-5"></i> Configuració
+                    </h2>
+
+                    <!-- Tipus d'Operació -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Operació</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="setOp('add')" id="btn-add" class="op-btn active p-3 rounded-lg border-2 border-emerald-500 bg-emerald-50 text-emerald-700 font-bold flex flex-col items-center gap-1 transition-all">
+                                <i data-lucide="plus" class="w-5 h-5"></i> Suma
+                            </button>
+                            <button onclick="setOp('sub')" id="btn-sub" class="op-btn p-3 rounded-lg border-2 border-slate-200 hover:border-emerald-300 font-bold flex flex-col items-center gap-1 transition-all">
+                                <i data-lucide="minus" class="w-5 h-5"></i> Resta
+                            </button>
+                            <button onclick="setOp('mul')" id="btn-mul" class="op-btn p-3 rounded-lg border-2 border-slate-200 hover:border-emerald-300 font-bold flex flex-col items-center gap-1 transition-all">
+                                <i data-lucide="x" class="w-5 h-5"></i> Multiplicació
+                            </button>
+                            <button onclick="setOp('div')" id="btn-div" class="op-btn p-3 rounded-lg border-2 border-slate-200 hover:border-emerald-300 font-bold flex flex-col items-center gap-1 transition-all">
+                                <i data-lucide="divide" class="w-5 h-5"></i> Divisió
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Xifres -->
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs font-bold text-emerald-600 uppercase mb-1">Xifres 1r Nombre</label>
+                            <input type="number" id="digitsA" value="3" min="1" max="6" class="w-full p-2 border border-emerald-200 rounded-lg text-center font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-emerald-600 uppercase mb-1">Xifres 2n Nombre</label>
+                            <input type="number" id="digitsB" value="2" min="1" max="6" class="w-full p-2 border border-emerald-200 rounded-lg text-center font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Quantitat -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Quantitat d'operacions</label>
+                        <input type="range" id="quantity" min="4" max="24" value="12" step="4" class="w-full h-2 bg-emerald-200 rounded-lg appearance-none cursor-pointer mb-2 accent-emerald-600">
+                        <div class="flex justify-between text-xs text-slate-500 font-bold">
+                            <span>4</span>
+                            <span id="qtyDisplay" class="text-emerald-600 text-lg">12</span>
+                            <span>24</span>
+                        </div>
+                    </div>
+
+                    <button onclick="generateSheet()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 transition-all flex justify-center items-center gap-2 transform hover:-translate-y-0.5">
+                        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                        Generar Fitxa
+                    </button>
+                </div>
+
+                <!-- Botó Imprimir -->
+                <button onclick="window.print()" class="w-full py-4 bg-white border-2 border-slate-800 hover:bg-slate-50 text-slate-800 font-bold rounded-xl shadow-sm transition-all flex justify-center items-center gap-2">
+                    <i data-lucide="printer" class="w-6 h-6"></i>
+                    IMPRIMIR FITXA
+                </button>
+                
+                <p class="text-xs text-center text-slate-400">En imprimir, s'afegiran automàticament els camps de Nom i Data.</p>
+            </div>
+
+            <!-- VISTA PREVIÓ (Dreta) -->
+            <div class="lg:col-span-8 bg-white p-8 rounded-2xl shadow-lg border border-slate-200 min-h-[600px] relative">
+                
+                <!-- Encapçalament d'Impressió (Ocult en pantalla normal) -->
+                <div class="hidden print-only mb-8">
+                    <div class="flex justify-between items-end border-b-2 border-slate-800 pb-4 mb-8">
+                        <div>
+                            <h2 class="text-sm font-bold uppercase text-slate-500 mb-1">Nom:</h2>
+                            <div class="h-8 border-b border-slate-300 w-64"></div>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-bold uppercase text-slate-500 mb-1">Data:</h2>
+                            <div class="h-8 border-b border-slate-300 w-32"></div>
+                        </div>
+                    </div>
+                    <h1 class="text-center text-2xl font-bold uppercase tracking-widest mb-8" id="printTitle">FITXA DE SUMES</h1>
+                </div>
+
+                <!-- Títol de vista prèvia -->
+                <div class="no-print absolute top-4 right-4 bg-slate-100 px-3 py-1 rounded text-xs font-bold text-slate-500 uppercase">
+                    Vista Prèvia
+                </div>
+
+                <!-- GRAELLA D'OPERACIONS -->
+                <div id="operationsGrid" class="grid grid-cols-2 md:grid-cols-3 gap-12 justify-items-center">
+                    <!-- Estat inicial buit -->
+                    <div id="emptyState" class="col-span-full flex flex-col items-center justify-center text-emerald-300 py-24 opacity-50">
+                        <i data-lucide="calculator" class="w-24 h-24 mb-4"></i>
+                        <p class="text-xl font-medium text-emerald-600">Configura les opcions i genera la fitxa</p>
+                    </div>
+                </div>
+
+                <!-- Footer d'Impressió -->
+                <div class="hidden print-only fixed bottom-4 left-0 w-full text-center text-xs text-slate-400">
+                    Generat amb l'Eina de Fitxes de Càlcul - Jo Recursos
+                </div>
+            </div>
         </div>
-    </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // ESTAT
+        let currentOp = 'add';
+        let hasGenerated = false; 
+        const symbols = { add: '+', sub: '-', mul: '×', div: ':' };
+        const titles = { add: 'FITXA DE SUMES', sub: 'FITXA DE RESTES', mul: 'FITXA DE MULTIPLICACIONS', div: 'FITXA DE DIVISIONS' };
+
+        // UI Helpers
+        const qtyInput = document.getElementById('quantity');
+        qtyInput.addEventListener('input', (e) => {
+            document.getElementById('qtyDisplay').innerText = e.target.value;
+        });
+
+        function setOp(op) {
+            currentOp = op;
+            // Actualitzar estils botons (Tema Emerald)
+            document.querySelectorAll('.op-btn').forEach(btn => {
+                btn.classList.remove('border-emerald-500', 'bg-emerald-50', 'text-emerald-700', 'active');
+                btn.classList.add('border-slate-200');
+            });
+            const activeBtn = document.getElementById(`btn-${op}`);
+            activeBtn.classList.remove('border-slate-200');
+            activeBtn.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-700', 'active');
+            
+            if (hasGenerated) {
+                generateSheet();
+            }
+        }
+
+        function generateRandomNumber(digits) {
+            const min = Math.pow(10, digits - 1);
+            const max = Math.pow(10, digits) - 1;
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function generateSheet() {
+            hasGenerated = true;
+            const grid = document.getElementById('operationsGrid');
+            grid.innerHTML = '';
+            
+            // Amagar estat buit si encara hi és
+            const emptyState = document.getElementById('emptyState');
+            if(emptyState) emptyState.style.display = 'none';
+            
+            const qty = parseInt(document.getElementById('quantity').value);
+            const digA = parseInt(document.getElementById('digitsA').value);
+            const digB = parseInt(document.getElementById('digitsB').value);
+            
+            document.getElementById('printTitle').innerText = titles[currentOp];
+
+            for(let i=0; i<qty; i++) {
+                let a = generateRandomNumber(digA);
+                let b = generateRandomNumber(digB);
+
+                // Evitar resultats negatius o decimals complicats per primària
+                if (currentOp === 'sub') {
+                    if (b > a) [a, b] = [b, a]; 
+                } else if (currentOp === 'div') {
+                    // Per divisions exactes simples (opcional, aquí deixem residu)
+                    // O simplement assegurar dividend > divisor
+                    if (b > a) [a, b] = [b, a];
+                    if (b === 0) b = 1; // Evitar div per zero
+                }
+
+                const el = document.createElement('div');
+                
+                if (currentOp === 'div') {
+                    // Format caixa de divisió
+                    el.className = 'division-container';
+                    el.innerHTML = `
+                        <div>${a}</div>
+                        <div class="divisor-box">${b}</div>
+                    `;
+                } else {
+                    // Format vertical estàndard (+, -, x)
+                    el.className = 'calc-container'; 
+                    el.innerHTML = `
+                        <div class="calc-operator font-bold text-slate-500">${symbols[currentOp]}</div>
+                        <div>${a}</div>
+                        <div>${b}</div>
+                        <div class="calc-line"></div>
+                    `;
+                }
+                
+                grid.appendChild(el);
+            }
+        }
+        
+        // Generar d'inici per no veure-ho buit
+        window.onload = () => {
+             generateSheet();
+        }
+
+    </script>
 </body>
 </html>
