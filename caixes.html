@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caixes Secretes - Jo Recursos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .brand-font { font-family: 'Fredoka', sans-serif; }
+        
+        /* Estil 3D per a les caixes (Flip Card) */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        
+        .box-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+        
+        .box.revealed .box-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .box-front, .box-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 1rem; /* rounded-2xl */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Part del davant (Número) */
+        .box-front {
+            background-color: white;
+            color: #059669; /* emerald-600 */
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            border: 2px solid #d1fae5; /* emerald-100 */
+        }
+        
+        /* Part del darrere (Operació) */
+        .box-back {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%); /* emerald gradient */
+            color: white;
+            transform: rotateY(180deg);
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: 2px solid #047857; /* emerald-700 */
+        }
+
+        /* Animació d'entrada */
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+    </style>
+</head>
+<body class="bg-emerald-50 text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Navegació -->
+    <nav class="bg-white shadow-md sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 flex justify-between h-20 items-center">
+            <a href="matematiques.html" class="flex items-center gap-2 text-gray-600 hover:text-emerald-600 transition">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i> Tornar a Mates
+            </a>
+            <span class="text-2xl font-bold text-emerald-900 brand-font">Caixes Secretes</span>
+        </div>
+    </nav>
+
+    <main class="flex-grow py-8 px-4">
+        <div class="max-w-6xl mx-auto">
+            
+            <!-- Panell de Control -->
+            <div class="bg-white p-6 rounded-2xl shadow-lg border border-emerald-100 mb-8">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                    <div class="p-3 bg-emerald-100 rounded-xl text-emerald-600">
+                        <i data-lucide="box" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-emerald-900">Configuració</h2>
+                        <p class="text-slate-500 text-sm">Genera operacions aleatòries per practicar càlcul mental</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 items-end">
+                    
+                    <!-- Rang A -->
+                    <div class="lg:col-span-1">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Primer Nombre</label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="minA" value="1" min="0" class="w-full p-2.5 border border-slate-200 rounded-lg text-center font-bold focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <span class="text-slate-400 font-bold">-</span>
+                            <input type="number" id="maxA" value="10" min="1" class="w-full p-2.5 border border-slate-200 rounded-lg text-center font-bold focus:ring-2 focus:ring-emerald-500 outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Rang B -->
+                    <div class="lg:col-span-1">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Segon Nombre</label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="minB" value="1" min="0" class="w-full p-2.5 border border-slate-200 rounded-lg text-center font-bold focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <span class="text-slate-400 font-bold">-</span>
+                            <input type="number" id="maxB" value="10" min="1" class="w-full p-2.5 border border-slate-200 rounded-lg text-center font-bold focus:ring-2 focus:ring-emerald-500 outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Quantitat -->
+                    <div class="lg:col-span-1">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Caixes</label>
+                        <input type="number" id="numBoxes" value="12" min="1" max="50" class="w-full p-2.5 border border-slate-200 rounded-lg text-center font-bold focus:ring-2 focus:ring-emerald-500 outline-none">
+                    </div>
+
+                    <!-- Operació -->
+                    <div class="lg:col-span-1">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Operació</label>
+                        <div class="relative">
+                            <select id="operation" class="w-full p-2.5 border border-slate-200 rounded-lg font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none appearance-none bg-white">
+                                <option value="multiply">Multiplicació (×)</option>
+                                <option value="add">Suma (+)</option>
+                                <option value="subtract">Resta (-)</option>
+                                <option value="divide">Divisió (÷)</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="absolute right-3 top-3 w-4 h-4 text-slate-400 pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <!-- Botó Generar -->
+                    <div class="lg:col-span-1">
+                        <button onclick="createBoxes()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 transition-all flex justify-center items-center gap-2 active:scale-95">
+                            <i data-lucide="refresh-cw" class="w-5 h-5"></i> Generar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Missatge d'Error -->
+                <div id="error-message" class="hidden mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm flex items-center gap-2">
+                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                    <span>El valor mínim no pot ser més gran que el màxim.</span>
+                </div>
+            </div>
+
+            <!-- Zona de Joc -->
+            <div class="mb-6 flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-slate-800 brand-font">Tria una caixa...</h2>
+                <button onclick="resetAllBoxes()" class="text-sm font-bold text-emerald-600 hover:text-emerald-800 flex items-center gap-1 bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-100 transition hover:shadow-md">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Tapar totes
+                </button>
+            </div>
+
+            <div id="box-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 perspective-1000">
+                <!-- Les caixes es generaran aquí -->
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="bg-white border-t py-8 mt-auto no-print">
+        <div class="max-w-6xl mx-auto px-4 text-center text-sm text-gray-500">
+            <p>&copy; 2025 Jo Recursos.</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        const boxContainer = document.getElementById('box-container');
+        const errorMessage = document.getElementById('error-message');
+
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function createBoxes() {
+            errorMessage.classList.add('hidden');
+
+            const minA = parseInt(document.getElementById('minA').value);
+            const maxA = parseInt(document.getElementById('maxA').value);
+            const minB = parseInt(document.getElementById('minB').value);
+            const maxB = parseInt(document.getElementById('maxB').value);
+            const numBoxes = parseInt(document.getElementById('numBoxes').value);
+            const operation = document.getElementById('operation').value;
+
+            if (minA > maxA || minB > maxB) {
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+
+            boxContainer.innerHTML = '';
+
+            for (let i = 0; i < numBoxes; i++) {
+                const randA = getRandomInt(minA, maxA);
+                const randB = getRandomInt(minB, maxB);
+                
+                let numA, numB, secretContent;
+
+                switch (operation) {
+                    case 'add':
+                        numA = randA; numB = randB;
+                        secretContent = `${numA} + ${numB}`;
+                        break;
+                    case 'subtract':
+                        numA = Math.max(randA, randB); numB = Math.min(randA, randB);
+                        secretContent = `${numA} - ${numB}`;
+                        break;
+                    case 'divide':
+                        const divisor = getRandomInt(Math.max(1, minB), maxB);
+                        const resultat = getRandomInt(minA, maxA);
+                        numA = divisor * resultat; numB = divisor;
+                        secretContent = `${numA} ÷ ${numB}`;
+                        break;
+                    case 'multiply':
+                    default:
+                        numA = randA; numB = randB;
+                        secretContent = `${numA} × ${numB}`;
+                        break;
+                }
+
+                const box = document.createElement('div');
+                box.className = 'box h-32 md:h-40 animate-pop';
+                box.style.animationDelay = `${i * 50}ms`; // Efecte cascada
+
+                box.innerHTML = `
+                    <div class="box-inner">
+                        <div class="box-front">
+                            ${i + 1}
+                        </div>
+                        <div class="box-back">
+                            ${secretContent}
+                        </div>
+                    </div>
+                `;
+
+                // Lògica de clic (toggle)
+                box.addEventListener('click', () => {
+                    box.classList.toggle('revealed');
+                });
+
+                boxContainer.appendChild(box);
+            }
+        }
+
+        function resetAllBoxes() {
+            const boxes = document.querySelectorAll('.box');
+            boxes.forEach(box => box.classList.remove('revealed'));
+        }
+
+        // Inicialitzar
+        createBoxes();
+    </script>
+</body>
+</html>
+```
+
+### I per actualitzar `matematiques.html`:
+
+Només cal afegir la targeta que enllaça a aquest fitxer. Pots afegir això al `grid` de `matematiques.html`, potser com a quarta opció o substituint alguna de les existents si vols.
+
+```html
+<!-- TARGETA CAIXES SECRETES -->
+<div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-emerald-200 ring-2 ring-emerald-50 group flex flex-col h-full">
+    <div class="flex justify-between items-start mb-4">
+        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">Càlcul Mental</span>
+        <i data-lucide="box" class="text-emerald-600 w-8 h-8 group-hover:scale-110 transition"></i>
+    </div>
+    <h4 class="font-bold text-lg mb-2">Caixes Secretes</h4>
+    <p class="text-gray-600 text-sm mb-6 flex-grow">Practica operacions de forma divertida descobrint què s'amaga darrere de cada caixa.</p>
+    
+    <a href="caixes.html" class="block w-full text-center bg-emerald-600 text-white py-2 rounded-lg font-bold hover:bg-emerald-700 transition shadow-md mt-auto">
+        Obrir Caixes 📦
+    </a>
+</div>
