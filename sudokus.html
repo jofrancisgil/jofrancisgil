@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Sudokus - Jo Recursos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .brand-font { font-family: 'Fredoka', sans-serif; }
+        
+        /* Graella del Sudoku */
+        .sudoku-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 0;
+            border: 4px solid #064e3b; /* emerald-900 */
+            background-color: #064e3b;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .sudoku-cell {
+            aspect-ratio: 1;
+            background: white;
+            border: 1px solid #d1fae5; /* emerald-100 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            position: relative;
+            cursor: pointer;
+        }
+
+        /* Inputs dins les caselles */
+        .sudoku-input {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #064e3b;
+            font-family: 'Fredoka', sans-serif;
+            padding: 0;
+            margin: 0;
+            -moz-appearance: textfield;
+            cursor: pointer; /* Unificar cursor */
+        }
+
+        /* Desactivar selecció de text per millorar experiència tàctil */
+        .sudoku-input {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Estat seleccionat (focus manual) */
+        .selected-cell {
+            background-color: #bfdbfe !important; /* blue-200 */
+        }
+        
+        /* Caselles fixes (pistes inicials) */
+        .fixed-cell {
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .fixed-cell input {
+            font-weight: 800;
+            color: #0f172a; /* slate-900 */
+            pointer-events: none; 
+        }
+
+        /* Bordes gruixuts per separar quadrants 3x3 */
+        .sudoku-cell:nth-child(3n) {
+            border-right: 3px solid #064e3b !important;
+        }
+        .sudoku-cell:nth-child(9n) {
+            border-right: 0 !important;
+        }
+        
+        .border-b-thick {
+            border-bottom: 3px solid #064e3b !important;
+        }
+
+        /* Estats de validació */
+        .valid-cell { background-color: #bbf7d0 !important; } /* green-200 */
+        .invalid-cell { background-color: #fecaca !important; } /* red-200 */
+
+        /* Estils del Teclat Extern */
+        .numpad-btn {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            background-color: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            color: #334155;
+            transition: all 0.1s;
+            touch-action: manipulation;
+        }
+        .numpad-btn:active {
+            transform: scale(0.95);
+            background-color: #e2e8f0;
+        }
+        .numpad-btn:hover {
+            border-color: #10b981; /* emerald-500 */
+            color: #047857; /* emerald-700 */
+        }
+        .numpad-btn.erase-btn {
+            color: #ef4444; /* red-500 */
+            border-color: #fecaca;
+        }
+
+        /* ESTILS D'IMPRESSIÓ */
+        @media print {
+            @page { margin: 1.5cm; }
+            body { background: white; color: black; padding: 0; }
+            nav, .controls-panel, footer, .no-print, .numpad-container { display: none !important; }
+            
+            .print-header { display: block !important; margin-bottom: 2rem; }
+            .sudoku-container { box-shadow: none !important; border: none !important; }
+            
+            .sudoku-grid {
+                border: 4px solid black !important;
+                background-color: black !important;
+                max-width: 100% !important;
+                width: 14cm !important;
+            }
+            .sudoku-cell {
+                border: 1px solid #999 !important;
+                background-color: white !important;
+            }
+            .sudoku-cell:nth-child(3n) { border-right: 3px solid black !important; }
+            .border-b-thick { border-bottom: 3px solid black !important; }
+            
+            .sudoku-input { color: black !important; font-size: 16pt; }
+            .selected-cell { background-color: white !important; }
+        }
+    </style>
+</head>
+<body class="bg-emerald-50 text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Navegació -->
+    <nav class="bg-white shadow-md sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 flex justify-between h-20 items-center">
+            <a href="matematiques.html" class="flex items-center gap-2 text-gray-600 hover:text-emerald-600 transition">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i> Tornar a Mates
+            </a>
+            <span class="text-2xl font-bold text-emerald-900 brand-font">Generador Sudokus</span>
+        </div>
+    </nav>
+
+    <main class="flex-grow py-8 px-4">
+        
+        <!-- HEADER IMPRESSIÓ (Ocult en pantalla) -->
+        <div class="hidden print-header max-w-2xl mx-auto">
+            <div class="flex justify-between items-end border-b-2 border-slate-800 pb-4 mb-8">
+                <div>
+                    <h2 class="text-sm font-bold uppercase text-slate-500 mb-1">Nom:</h2>
+                    <div class="h-8 border-b border-slate-300 w-64"></div>
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold uppercase text-slate-500 mb-1">Data:</h2>
+                    <div class="h-8 border-b border-slate-300 w-32"></div>
+                </div>
+            </div>
+            <h1 class="text-center text-3xl font-bold uppercase tracking-widest text-slate-800 mb-2" id="printTitle">SUDOKU</h1>
+            <p class="text-center text-sm uppercase text-slate-500" id="printLevel">Nivell: Mitjà</p>
+        </div>
+
+        <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- PANELL DE CONTROL (Esquerra) -->
+            <div class="lg:col-span-4 space-y-6 controls-panel no-print">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-emerald-100">
+                    <h2 class="font-bold text-lg mb-4 flex items-center gap-2 text-emerald-800">
+                        <i data-lucide="settings-2" class="w-5 h-5"></i> Configuració
+                    </h2>
+                    
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Nivell de Dificultat</label>
+                    <div class="grid grid-cols-3 gap-2 mb-6">
+                        <button onclick="setLevel('easy')" id="btn-easy" class="lvl-btn py-2 rounded-lg border-2 border-emerald-500 bg-emerald-50 text-emerald-700 font-bold text-sm transition-all">Fàcil</button>
+                        <button onclick="setLevel('medium')" id="btn-medium" class="lvl-btn py-2 rounded-lg border-2 border-slate-200 text-slate-600 font-bold text-sm transition-all hover:border-emerald-300">Mitjà</button>
+                        <button onclick="setLevel('hard')" id="btn-hard" class="lvl-btn py-2 rounded-lg border-2 border-slate-200 text-slate-600 font-bold text-sm transition-all hover:border-emerald-300">Difícil</button>
+                    </div>
+
+                    <button onclick="generateSudoku()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 transition-all flex justify-center items-center gap-2 mb-4">
+                        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                        Joc Nou
+                    </button>
+
+                    <button onclick="checkSudoku()" class="w-full py-3 bg-white border-2 border-emerald-600 text-emerald-700 font-bold rounded-xl hover:bg-emerald-50 transition-all flex justify-center items-center gap-2">
+                        <i data-lucide="check-circle" class="w-5 h-5"></i>
+                        Verificar
+                    </button>
+                </div>
+
+                <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-emerald-800">
+                    <p class="font-bold text-sm mb-1"><i data-lucide="printer" class="inline w-4 h-4 mr-1"></i> Mode Impressió</p>
+                    <p class="text-xs">Genera el Sudoku i prem imprimir per obtenir una fitxa amb espai per al nom i la data.</p>
+                    <button onclick="window.print()" class="mt-3 w-full py-2 bg-emerald-800 text-white text-sm font-bold rounded-lg hover:bg-emerald-900 transition">
+                        Imprimir Sudoku
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAULELL DE JOC (Centre/Dreta) -->
+            <div class="lg:col-span-8 flex flex-col items-center">
+                <div class="bg-white p-2 md:p-8 rounded-2xl shadow-lg border border-slate-200 sudoku-container w-full max-w-[600px]">
+                    <div class="sudoku-grid" id="grid">
+                        <!-- Generat per JS -->
+                    </div>
+                </div>
+
+                <!-- TECLAT NUMÈRIC EXTERN -->
+                <div class="numpad-container mt-6 w-full max-w-[500px] no-print">
+                    <div class="grid grid-cols-5 gap-2 md:gap-4">
+                        <button onclick="handleKeypad(1)" class="numpad-btn">1</button>
+                        <button onclick="handleKeypad(2)" class="numpad-btn">2</button>
+                        <button onclick="handleKeypad(3)" class="numpad-btn">3</button>
+                        <button onclick="handleKeypad(4)" class="numpad-btn">4</button>
+                        <button onclick="handleKeypad(5)" class="numpad-btn">5</button>
+                        <button onclick="handleKeypad(6)" class="numpad-btn">6</button>
+                        <button onclick="handleKeypad(7)" class="numpad-btn">7</button>
+                        <button onclick="handleKeypad(8)" class="numpad-btn">8</button>
+                        <button onclick="handleKeypad(9)" class="numpad-btn">9</button>
+                        <button onclick="handleKeypad('X')" class="numpad-btn erase-btn" title="Esborrar">
+                            <i data-lucide="delete" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4 text-xs text-slate-400 no-print">
+                    Selecciona una casella i fes servir el teclat numèric o les tecles per omplir-la.
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="bg-white border-t py-8 mt-auto no-print">
+        <div class="max-w-6xl mx-auto px-4 text-center text-sm text-gray-500">
+            <p>&copy; 2025 Jo Recursos.</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // --- LÒGICA SUDOKU ---
+        let currentLevel = 'easy';
+        let solutionBoard = [];
+        let displayBoard = [];
+        let selectedInput = null; // Variable per guardar l'input seleccionat actualment
+
+        // Inicialització
+        window.onload = () => generateSudoku();
+
+        // Evitar que els botons del teclat treguin el focus (opcional, però ajuda en la UX)
+        document.addEventListener('click', function(e) {
+            // Si cliquem fora del sudoku i fora del teclat, deseleccionar
+            if (!e.target.closest('.sudoku-grid') && !e.target.closest('.numpad-container')) {
+                // Opcional: deseleccionar si es vol
+                // if(selectedInput) deselectCell();
+            }
+        });
+
+        function setLevel(level) {
+            currentLevel = level;
+            document.querySelectorAll('.lvl-btn').forEach(btn => {
+                btn.className = "lvl-btn py-2 rounded-lg border-2 border-slate-200 text-slate-600 font-bold text-sm transition-all hover:border-emerald-300";
+            });
+            const activeBtn = document.getElementById(`btn-${level}`);
+            activeBtn.className = "lvl-btn py-2 rounded-lg border-2 border-emerald-500 bg-emerald-50 text-emerald-700 font-bold text-sm transition-all";
+            
+            const labels = { 'easy': 'Fàcil', 'medium': 'Mitjà', 'hard': 'Difícil' };
+            document.getElementById('printLevel').innerText = `NIVELL: ${labels[level].toUpperCase()}`;
+        }
+
+        function generateSudoku() {
+            selectedInput = null;
+            let board = Array(9).fill().map(() => Array(9).fill(0));
+            fillDiagonal(board);
+            solveSudoku(board);
+            solutionBoard = JSON.parse(JSON.stringify(board));
+            let attempts = currentLevel === 'easy' ? 30 : (currentLevel === 'medium' ? 45 : 56);
+            removeDigits(board, attempts);
+            displayBoard = board;
+            renderGrid();
+        }
+
+        function fillDiagonal(board) {
+            for (let i = 0; i < 9; i = i + 3) fillBox(board, i, i);
+        }
+        function fillBox(board, row, col) {
+            let num;
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    do { num = Math.floor(Math.random() * 9) + 1; } 
+                    while (!isSafeInBox(board, row, col, num));
+                    board[row + i][col + j] = num;
+                }
+            }
+        }
+        function isSafeInBox(board, rowStart, colStart, num) {
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (board[rowStart + i][colStart + j] === num) return false;
+                }
+            }
+            return true;
+        }
+        function isSafe(board, row, col, num) {
+            for (let x = 0; x < 9; x++) if (board[row][x] === num) return false;
+            for (let x = 0; x < 9; x++) if (board[x][col] === num) return false;
+            let startRow = row - row % 3, startCol = col - col % 3;
+            for (let i = 0; i < 3; i++) 
+                for (let j = 0; j < 3; j++) 
+                    if (board[i + startRow][j + startCol] === num) return false;
+            return true;
+        }
+        function solveSudoku(board) {
+            let row = -1, col = -1, isEmpty = true; 
+            for (let i = 0; i < 9; i++) { 
+                for (let j = 0; j < 9; j++) { 
+                    if (board[i][j] === 0) { row = i; col = j; isEmpty = false; break; } 
+                } 
+                if (!isEmpty) break; 
+            } 
+            if (isEmpty) return true; 
+            for (let num = 1; num <= 9; num++) { 
+                if (isSafe(board, row, col, num)) { 
+                    board[row][col] = num; 
+                    if (solveSudoku(board)) return true; 
+                    board[row][col] = 0; 
+                } 
+            } 
+            return false; 
+        }
+        function removeDigits(board, count) {
+            while (count > 0) {
+                let cellId = Math.floor(Math.random() * 81);
+                let i = Math.floor(cellId / 9);
+                let j = cellId % 9;
+                if (board[i][j] !== 0) { board[i][j] = 0; count--; }
+            }
+        }
+
+        // --- GESTIÓ DE SELECCIÓ I INPUT ---
+
+        function selectCell(inputElement) {
+            // Treure selecció prèvia
+            if (selectedInput) {
+                selectedInput.parentElement.classList.remove('selected-cell');
+            }
+            
+            // Assignar nova selecció
+            selectedInput = inputElement;
+            selectedInput.parentElement.classList.add('selected-cell');
+        }
+
+        function deselectCell() {
+            if (selectedInput) {
+                selectedInput.parentElement.classList.remove('selected-cell');
+                selectedInput = null;
+            }
+        }
+
+        function handleKeypad(value) {
+            if (!selectedInput) return; // Si no hi ha res seleccionat, no fer res
+
+            if (value === 'X') {
+                selectedInput.value = "";
+            } else {
+                selectedInput.value = value;
+            }
+
+            // Disparar l'event 'input' manualment perquè s'executi la lògica de neteja
+            const event = new Event('input', { bubbles: true });
+            selectedInput.dispatchEvent(event);
+        }
+
+        // UI RENDER
+        function renderGrid() {
+            const gridEl = document.getElementById('grid');
+            gridEl.innerHTML = '';
+
+            for (let i = 0; i < 9; i++) {
+                for (let j = 0; j < 9; j++) {
+                    const val = displayBoard[i][j];
+                    const cell = document.createElement('div');
+                    
+                    let classes = "sudoku-cell";
+                    if (i === 2 || i === 5) classes += " border-b-thick";
+                    if (val !== 0) classes += " fixed-cell";
+                    cell.className = classes;
+
+                    const input = document.createElement('input');
+                    input.type = "text"; 
+                    input.inputMode = "none"; // Evita que surti el teclat natiu del mòbil si es vol fer servir només l'extern, o "numeric" si es volen els dos. "none" és millor si tenim teclat extern.
+                    // Però "numeric" és millor si l'usuari vol teclat físic. Deixarem numeric per flexibilitat.
+                    input.inputMode = "numeric"; 
+                    input.autocomplete = "off";
+                    input.className = "sudoku-input";
+                    input.maxLength = 1;
+                    
+                    input.dataset.row = i;
+                    input.dataset.col = j;
+                    
+                    if (val !== 0) {
+                        input.value = val;
+                        input.readOnly = true;
+                        input.tabIndex = -1; // Saltar caselles fixes al tabuador
+                    } else {
+                        input.value = "";
+                        
+                        // EVENT CLICK / FOCUS: Seleccionar casella
+                        input.addEventListener('focus', function() {
+                            selectCell(this);
+                        });
+
+                        // També suport al click directe al div pare per facilitar UX
+                        cell.addEventListener('click', function() {
+                            input.focus();
+                        });
+
+                        input.oninput = function() { 
+                            this.value = this.value.replace(/[^1-9]/g, '');
+                            if(this.value.length > 1) this.value = this.value.slice(0,1);
+                            this.parentElement.classList.remove('valid-cell', 'invalid-cell');
+                        }
+                        
+                        // Navegació amb fletxes (millora d'accessibilitat)
+                        input.addEventListener('keydown', function(e) {
+                            // Si es vol esborrar amb Backspace/Delete
+                            if(e.key === 'Backspace' || e.key === 'Delete') {
+                                this.value = '';
+                                this.parentElement.classList.remove('valid-cell', 'invalid-cell');
+                                return;
+                            }
+                        });
+                    }
+                    
+                    cell.appendChild(input);
+                    gridEl.appendChild(cell);
+                }
+            }
+            lucide.createIcons(); // Refrescar icones si cal
+        }
+
+        function checkSudoku() {
+            const inputs = document.querySelectorAll('.sudoku-input');
+            let errors = 0;
+            let empty = 0;
+
+            inputs.forEach(inp => {
+                const r = parseInt(inp.dataset.row);
+                const c = parseInt(inp.dataset.col);
+                const parent = inp.parentElement;
+
+                parent.classList.remove('valid-cell', 'invalid-cell');
+
+                if (displayBoard[r][c] !== 0) return;
+
+                const userVal = parseInt(inp.value);
+
+                if (!userVal) {
+                    empty++;
+                    return;
+                }
+
+                if (userVal === solutionBoard[r][c]) {
+                    parent.classList.add('valid-cell');
+                } else {
+                    parent.classList.add('invalid-cell');
+                    errors++;
+                }
+            });
+
+            if (errors === 0 && empty === 0) {
+                const script = document.createElement('script');
+                script.src = "https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js";
+                script.onload = () => confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                document.body.appendChild(script);
+            }
+        }
+
+    </script>
+</body>
+</html>
