@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600&family=Inter:wght@300;400;600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Icones Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -14,7 +16,7 @@
         .hidden-lang { display: none; }
         .hidden-app { display: none !important; }
 
-        /* Estils App Verbs */
+        /* Estils App Verbs (Mantinguts de la versió original) */
         .verb-app-wrapper {
             --union-blue: #012169; --union-red: #C8102E; --bg-gradient: linear-gradient(135deg, #f0f4f8 0%, #dbeafe 100%); --radius: 16px;
             font-family: 'Poppins', sans-serif; background: var(--bg-gradient); padding: 20px; border-radius: var(--radius);
@@ -40,7 +42,7 @@
     <nav class="bg-white shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 flex justify-between h-20 items-center">
             <a href="index.html" class="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition">
-                <i class="fas fa-arrow-left"></i> Tornar a l'Inici
+                <i data-lucide="arrow-left" class="w-5 h-5"></i> Tornar a l'Inici
             </a>
             <span class="text-2xl font-bold text-blue-900 brand-font">Secció Llengües</span>
         </div>
@@ -62,7 +64,21 @@
                 <div class="w-2 h-8 bg-yellow-500 rounded-full"></div>
                 <h3 class="text-2xl font-bold text-gray-800">Recursos de Català</h3>
             </div>
-            <p class="text-gray-500">Materials de gramàtica i lectura pròximament.</p>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Targeta Comprensió Lectora -->
+                <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-yellow-200 ring-2 ring-yellow-50 flex flex-col h-full group">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full">Lectura</span>
+                        <i data-lucide="book-open" class="text-yellow-600 w-8 h-8 group-hover:scale-110 transition"></i>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">Comprensions Lectores</h4>
+                    <p class="text-gray-600 text-sm mb-6 flex-grow">Llegeix textos interessants i respon les preguntes per comprovar què has entès.</p>
+                    <a href="comprensions.html" class="block w-full text-center bg-yellow-500 text-white py-2 rounded-lg font-bold hover:bg-yellow-600 transition shadow-md mt-auto">
+                        Llegir i Comprendre 📖
+                    </a>
+                </div>
+            </div>
         </div>
 
         <!-- CASTELLANO -->
@@ -71,7 +87,21 @@
                 <div class="w-2 h-8 bg-red-500 rounded-full"></div>
                 <h3 class="text-2xl font-bold text-gray-800">Recursos de Castellano</h3>
             </div>
-            <p class="text-gray-500">Recursos de lengua castellana próximamente.</p>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Targeta Comprensión Lectora -->
+                <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-red-200 ring-2 ring-red-50 flex flex-col h-full group">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full">Lectura</span>
+                        <i data-lucide="book-open" class="text-red-600 w-8 h-8 group-hover:scale-110 transition"></i>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">Comprensiones Lectoras</h4>
+                    <p class="text-gray-600 text-sm mb-6 flex-grow">Lee textos interesantes y responde a las preguntas para comprobar qué has entendido.</p>
+                    <a href="comprensiones.html" class="block w-full text-center bg-red-500 text-white py-2 rounded-lg font-bold hover:bg-red-600 transition shadow-md mt-auto">
+                        Leer y Comprender 📖
+                    </a>
+                </div>
+            </div>
         </div>
 
         <!-- ENGLISH -->
@@ -82,14 +112,28 @@
                     <h3 class="text-2xl font-bold text-gray-800">English Resources</h3>
                 </div>
                 <div class="grid md:grid-cols-3 gap-6">
-                    <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-blue-200 ring-2 ring-blue-50">
+                    <!-- Irregular Verbs Card -->
+                    <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-blue-200 ring-2 ring-blue-50 flex flex-col h-full group">
                         <div class="flex justify-between items-start mb-4">
                             <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Grammar</span>
-                            <i class="fas fa-gamepad text-purple-600 text-xl"></i>
+                            <i class="fas fa-gamepad text-purple-600 text-xl group-hover:scale-110 transition"></i>
                         </div>
                         <h4 class="font-bold text-lg mb-2">Irregular Verbs Master</h4>
-                        <p class="text-gray-600 text-sm mb-4">Interactive test to practice irregular verbs. UK Edition.</p>
-                        <button onclick="openVerbApp()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-md">Start Test 🚀</button>
+                        <p class="text-gray-600 text-sm mb-4 flex-grow">Interactive test to practice irregular verbs. UK Edition.</p>
+                        <button onclick="openVerbApp()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-md mt-auto">Start Test 🚀</button>
+                    </div>
+
+                    <!-- Taboo Card (NOVA) -->
+                    <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-pink-200 ring-2 ring-pink-50 flex flex-col h-full group">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="bg-pink-100 text-pink-800 text-xs font-bold px-3 py-1 rounded-full">Vocabulary</span>
+                            <i data-lucide="message-circle-off" class="text-pink-600 w-8 h-8 group-hover:scale-110 transition"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">Taboo (Vocabulary Game)</h4>
+                        <p class="text-gray-600 text-sm mb-4 flex-grow">Describe words without saying the forbidden ones. Fun speaking practice!</p>
+                        <a href="tabooeng.html" class="block w-full text-center bg-pink-500 text-white py-2 rounded-lg font-bold hover:bg-pink-600 transition shadow-md mt-auto">
+                            Play Taboo 🤐
+                        </a>
                     </div>
                 </div>
             </div>
@@ -119,6 +163,8 @@
     </main>
 
     <script>
+        lucide.createIcons();
+
         // Navegació Pestanyes
         function showLanguage(langId) {
             document.querySelectorAll('.lang-content').forEach(el => el.classList.add('hidden-lang'));
