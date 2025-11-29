@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Memory Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: #f0f9ff;
+            user-select: none;
+        }
+
+        /* Card Container */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        /* State: Flipped */
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        /* State: Matched (Bounce animation) */
+        .card.matched .card-inner {
+            transform: rotateY(180deg);
+            animation: bounce 0.5s ease-in-out;
+        }
+
+        /* Front and Back common styles */
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Card Front */
+        .card-front {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            font-size: 3rem;
+            border: 4px solid white;
+        }
+
+        /* Card Back */
+        .card-back {
+            background-color: white;
+            color: black;
+            transform: rotateY(180deg);
+            border: 4px solid #fbbf24;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: rotateY(180deg) scale(1); }
+            50% { transform: rotateY(180deg) scale(1.1); }
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .pop-in {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .hidden-screen {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 relative">
+
+    <!-- THEME SELECTION SCREEN -->
+    <div id="theme-selection" class="flex flex-col items-center justify-center w-full max-w-2xl z-10 pop-in">
+        <h1 class="text-4xl md:text-5xl font-bold text-indigo-600 mb-2 text-center">Vocabulary Memory</h1>
+        <p class="text-gray-500 mb-8 text-lg">Choose a topic to start playing!</p>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full px-4">
+            <button onclick="startGame('clothes')" class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition border-b-4 border-indigo-200 group">
+                <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">👕</div>
+                <div class="font-bold text-gray-700 text-xl">Clothes</div>
+            </button>
+            <button onclick="startGame('weather')" class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition border-b-4 border-sky-200 group">
+                <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">☀️</div>
+                <div class="font-bold text-gray-700 text-xl">Weather</div>
+            </button>
+            <button onclick="startGame('moods')" class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition border-b-4 border-yellow-200 group">
+                <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">😄</div>
+                <div class="font-bold text-gray-700 text-xl">Moods</div>
+            </button>
+            <button onclick="startGame('animals')" class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition border-b-4 border-green-200 group">
+                <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">🐕</div>
+                <div class="font-bold text-gray-700 text-xl">Animals</div>
+            </button>
+            <button onclick="startGame('colours')" class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition border-b-4 border-pink-200 group">
+                <div class="text-4xl mb-2 group-hover:scale-110 transition-transform">🎨</div>
+                <div class="font-bold text-gray-700 text-xl">Colours</div>
+            </button>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="game-container" class="w-full max-w-4xl flex flex-col items-center hidden-screen">
+        <!-- Header -->
+        <header class="w-full flex justify-between items-center mb-6 px-4">
+            <button onclick="showThemeSelection()" class="text-indigo-600 font-bold hover:underline flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm">
+                <span>← Back to Menu</span>
+            </button>
+            
+            <div class="flex flex-col items-center">
+                <h2 id="current-theme-title" class="text-2xl font-bold text-indigo-600">Theme</h2>
+            </div>
+
+            <div class="bg-white px-4 py-2 rounded-xl shadow-sm flex flex-col items-center min-w-[80px]">
+                <span class="text-xs text-gray-400 uppercase font-bold">Moves</span>
+                <span id="move-count" class="text-2xl font-bold text-indigo-600">0</span>
+            </div>
+        </header>
+
+        <!-- Game Grid -->
+        <!-- w-full to allow grid to grow, max-w-3xl for larger screens -->
+        <div id="game-grid" class="grid gap-3 sm:gap-4 w-full px-2 sm:px-8">
+            <!-- Cards will be injected here by JavaScript -->
+        </div>
+
+        <!-- Restart Button (In-game) -->
+        <button onclick="resetCurrentGame()" class="mt-8 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            Restart Level
+        </button>
+    </div>
+
+    <!-- Win Modal -->
+    <div id="win-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-xs w-full mx-4 pop-in">
+            <div class="text-5xl mb-4">🎉</div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Great Job!</h2>
+            <p class="text-gray-600 mb-6">You finished the <span id="completed-theme" class="font-bold text-indigo-600"></span> theme in <span id="final-moves" class="font-bold text-indigo-600"></span> moves.</p>
+            <div class="flex flex-col gap-3">
+                <button onclick="closeModalAndRestart()" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition">
+                    Play Again
+                </button>
+                <button onclick="closeModalAndMenu()" class="w-full bg-indigo-100 text-indigo-700 font-bold py-3 rounded-xl hover:bg-indigo-200 transition">
+                    Choose New Theme
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const themes = {
+            clothes: [
+                { emoji: '👒', name: 'Hat' }, { emoji: '🕶️', name: 'Sunglasses' },
+                { emoji: '🧣', name: 'Scarf' }, { emoji: '👕', name: 'T-shirt' },
+                { emoji: '🧥', name: 'Jacket' }, { emoji: '👖', name: 'Trousers' },
+                { emoji: '🧦', name: 'Socks' }, { emoji: '👟', name: 'Shoes' }
+            ],
+            weather: [
+                { emoji: '☀️', name: 'Sunny' }, { emoji: '🌧️', name: 'Rainy' },
+                { emoji: '🥶', name: 'Cold' }, { emoji: '🥵', name: 'Hot' },
+                { emoji: '❄️', name: 'Snowy' }, { emoji: '💨', name: 'Windy' }
+            ],
+            moods: [
+                { emoji: '😄', name: 'Happy' }, { emoji: '😢', name: 'Sad' },
+                { emoji: '😠', name: 'Angry' }, { emoji: '😴', name: 'Tired' },
+                { emoji: '🍽️', name: 'Hungry' }, { emoji: '🥤', name: 'Thirsty' },
+                { emoji: '🥶', name: 'Cold' }, { emoji: '🥵', name: 'Hot' }
+            ],
+            animals: [
+                { emoji: '🐕', name: 'Dog' }, { emoji: '🐈', name: 'Cat' },
+                { emoji: '🐄', name: 'Cow' }, { emoji: '🐑', name: 'Sheep' },
+                { emoji: '🐔', name: 'Hen' }, { emoji: '🐎', name: 'Horse' },
+                { emoji: '🐖', name: 'Pig' }, { emoji: '🐁', name: 'Mouse' }
+            ],
+            colours: [
+                { emoji: '🟥', name: 'Red' }, { emoji: '🟦', name: 'Blue' },
+                { emoji: '🟩', name: 'Green' }, { emoji: '🟨', name: 'Yellow' },
+                { emoji: '⬛', name: 'Black' }, { emoji: '⬜', name: 'White' },
+                { emoji: '🟧', name: 'Orange' }, { emoji: '🟪', name: 'Purple' }
+            ]
+        };
+
+        // --- STATE VARIABLES ---
+        let currentThemeKey = '';
+        let cardsArray = [];
+        let hasFlippedCard = false;
+        let lockBoard = false;
+        let firstCard = null;
+        let secondCard = null;
+        let moves = 0;
+        let matchesFound = 0;
+        let totalPairs = 0;
+
+        // --- DOM ELEMENTS ---
+        const themeSelectionScreen = document.getElementById('theme-selection');
+        const gameContainer = document.getElementById('game-container');
+        const gridElement = document.getElementById('game-grid');
+        const moveCountElement = document.getElementById('move-count');
+        const winModal = document.getElementById('win-modal');
+        const finalMovesElement = document.getElementById('final-moves');
+        const completedThemeElement = document.getElementById('completed-theme');
+        const currentThemeTitle = document.getElementById('current-theme-title');
+
+        // --- INITIALIZATION & NAVIGATION ---
+
+        function startGame(themeKey) {
+            currentThemeKey = themeKey;
+            
+            // Update UI Headers
+            currentThemeTitle.innerText = themeKey.charAt(0).toUpperCase() + themeKey.slice(1);
+            
+            // Switch Screens
+            themeSelectionScreen.classList.add('hidden-screen');
+            gameContainer.classList.remove('hidden-screen');
+            
+            initGameLogic();
+        }
+
+        function showThemeSelection() {
+            // Reset and go back
+            resetBoard();
+            gameContainer.classList.add('hidden-screen');
+            themeSelectionScreen.classList.remove('hidden-screen');
+            winModal.classList.add('hidden');
+        }
+
+        function resetCurrentGame() {
+            initGameLogic();
+        }
+
+        // --- GAME LOGIC ---
+
+        function initGameLogic() {
+            // Reset Variables
+            hasFlippedCard = false;
+            lockBoard = false;
+            firstCard = null;
+            secondCard = null;
+            moves = 0;
+            matchesFound = 0;
+            moveCountElement.innerText = moves;
+            winModal.classList.add('hidden');
+
+            // Get Data
+            const themeData = themes[currentThemeKey];
+            totalPairs = themeData.length;
+
+            // Create Pairs & Shuffle
+            // We create a new array with unique IDs for this specific run
+            let tempArray = [];
+            themeData.forEach((item, index) => {
+                // Add pair 1
+                tempArray.push({ ...item, uniqueId: `pair${index}-1` });
+                // Add pair 2
+                tempArray.push({ ...item, uniqueId: `pair${index}-2` });
+            });
+            cardsArray = shuffle(tempArray);
+
+            // Setup Grid CSS based on count
+            // If 6 pairs (12 cards), 4 cols x 3 rows usually works well.
+            // If 8 pairs (16 cards), 4 cols x 4 rows.
+            gridElement.className = 'grid gap-3 sm:gap-4 w-full px-2 sm:px-8 max-w-3xl mx-auto';
+            
+            if (totalPairs === 6) {
+                 // Weather (12 cards) -> Mobile: 3 cols, Desktop: 4 cols
+                 gridElement.classList.add('grid-cols-3', 'md:grid-cols-4');
+            } else {
+                 // Others (16 cards) -> Mobile: 4 cols (might be tight) or 3, Desktop: 4 cols
+                 // Let's stick to 4 cols but make sure cards shrink
+                 gridElement.classList.add('grid-cols-4');
+            }
+
+            // Build HTML
+            gridElement.innerHTML = '';
+            cardsArray.forEach(item => {
+                const card = createCardElement(item);
+                gridElement.appendChild(card);
+            });
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function createCardElement(item) {
+            const card = document.createElement('div');
+            // aspect-[3/4] makes them taller rectangles to fit text better, or aspect-square
+            // Let's use aspect-[4/5] to give a bit more vertical room for text
+            card.classList.add('card', 'w-full', 'perspective-1000', 'aspect-[4/5]');
+            card.dataset.name = item.name;
+            
+            card.innerHTML = `
+                <div class="card-inner relative w-full h-full transition-transform duration-500 transform-style-3d">
+                    <!-- Front (Question Mark) -->
+                    <div class="card-front flex items-center justify-center rounded-xl shadow-md">
+                        <span class="text-4xl font-bold opacity-80">?</span>
+                    </div>
+                    
+                    <!-- Back (Content) -->
+                    <div class="card-back flex flex-col items-center justify-center rounded-xl shadow-md bg-white absolute top-0 left-0 w-full h-full backface-hidden transform-rotate-y-180 border-4 border-yellow-400 p-2">
+                        <div class="text-5xl sm:text-6xl mb-2 transform transition-transform hover:scale-110">${item.emoji}</div>
+                        <div class="text-base sm:text-lg font-bold text-gray-700 leading-tight text-center w-full truncate px-1">${item.name}</div>
+                    </div>
+                </div>
+            `;
+
+            card.addEventListener('click', flipCard);
+            return card;
+        }
+
+        function flipCard() {
+            if (lockBoard) return;
+            if (this === firstCard) return;
+
+            this.classList.add('flipped');
+
+            if (!hasFlippedCard || !firstCard) {
+                hasFlippedCard = true;
+                firstCard = this;
+                return;
+            }
+
+            secondCard = this;
+            incrementMoves();
+            checkForMatch();
+        }
+
+        function incrementMoves() {
+            moves++;
+            moveCountElement.innerText = moves;
+        }
+
+        function checkForMatch() {
+            if (!firstCard || !secondCard) {
+                resetBoard();
+                return;
+            }
+
+            let isMatch = firstCard.dataset.name === secondCard.dataset.name;
+
+            if (isMatch) {
+                disableCards();
+            } else {
+                unflipCards();
+            }
+        }
+
+        function disableCards() {
+            if(firstCard) firstCard.classList.add('matched');
+            if(secondCard) secondCard.classList.add('matched');
+
+            if(firstCard) firstCard.removeEventListener('click', flipCard);
+            if(secondCard) secondCard.removeEventListener('click', flipCard);
+
+            resetBoard();
+            
+            matchesFound++;
+            if (matchesFound === totalPairs) {
+                setTimeout(() => {
+                    finalMovesElement.innerText = moves;
+                    completedThemeElement.innerText = currentThemeKey;
+                    winModal.classList.remove('hidden');
+                    launchConfetti();
+                }, 600);
+            }
+        }
+
+        function unflipCards() {
+            lockBoard = true;
+
+            setTimeout(() => {
+                if(firstCard) firstCard.classList.remove('flipped');
+                if(secondCard) secondCard.classList.remove('flipped');
+                resetBoard();
+            }, 1200); // Slightly longer delay so they can read the word
+        }
+
+        function resetBoard() {
+            [hasFlippedCard, lockBoard] = [false, false];
+            [firstCard, secondCard] = [null, null];
+        }
+
+        function closeModalAndRestart() {
+            winModal.classList.add('hidden');
+            resetCurrentGame();
+        }
+        
+        function closeModalAndMenu() {
+            winModal.classList.add('hidden');
+            showThemeSelection();
+        }
+
+        function launchConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
