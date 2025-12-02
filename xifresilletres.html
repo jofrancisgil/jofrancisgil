@@ -225,7 +225,7 @@
             background: white;
         }
 
-        /* PANELL SOLUCIÓ (NOU) */
+        /* PANELL SOLUCIÓ */
         .solution-panel {
             background: #f8fafc;
             padding: 15px;
@@ -262,6 +262,28 @@
         }
         .result-success { background: #dcfce7; color: #166534; }
         .result-error { background: #fee2e2; color: #991b1b; }
+        
+        /* SOLUCIÓ XIFRES */
+        .steps-list {
+            text-align: left;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+        
+        .steps-list div {
+            border-bottom: 1px dashed #e2e8f0;
+            padding: 5px 0;
+        }
+        .steps-list div:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            color: var(--primary);
+        }
 
     </style>
 </head>
@@ -366,6 +388,13 @@
             </select>
         </div>
         <button onclick="startTimer('xifres')" class="action-btn" id="start-xifres" disabled>⏱️ Començar Temps</button>
+
+        <!-- PANELL SOLUCIÓ (XIFRES) -->
+        <div id="solution-panel-xifres" class="solution-panel" style="display:none;">
+            <p style="font-weight:bold;">S'ha acabat el temps!</p>
+            <button onclick="findMathSolution()" class="action-btn" style="background-color: var(--accent); color: black;">💡 Veure la millor solució</button>
+            <div id="math-solution-output" style="margin-top:15px;"></div>
+        </div>
     </div>
 </div>
 
@@ -376,8 +405,6 @@
     const GRANS = [25, 50, 75, 100];
     const PETITS = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10];
 
-    // --- PETIT DICCIONARI DE MOSTRA (Per testejar sense API externa) ---
-    // En un entorn real, això es faria amb una crida a un fitxer .json extern o API
     const MOCK_DICTIONARY = [
         "CASA", "GAT", "GOS", "TAULA", "CADIRA", "ORDINADOR", "JOC", "XIFRES", 
         "LLETRES", "CATALA", "SOL", "LLUNA", "CEL", "TERRA", "MAR", "FOC", 
@@ -385,10 +412,10 @@
         "ESCOLA", "LLIBRE", "PAPER", "BOLIGRAF", "LLAPIS", "GOMA", "ESTIU"
     ];
 
-    // Estat
     let state = {
         lletres: [],
         xifres: [],
+        xifresTarget: 0,
         interval: null,
         mode: 'lletres'
     };
@@ -413,8 +440,6 @@
 
     function stopTimer() {
         if (state.interval) clearInterval(state.interval);
-        
-        // Reset display to selected values if needed...
         document.getElementById('timer-lletres').classList.remove('urgent');
         document.getElementById('timer-xifres').classList.remove('urgent');
     }
@@ -429,6 +454,9 @@
             document.getElementById('solution-panel-lletres').style.display = 'none';
             document.getElementById('word-result-msg').innerHTML = '';
             document.getElementById('user-word-input').value = '';
+        } else {
+            document.getElementById('solution-panel-xifres').style.display = 'none';
+            document.getElementById('math-solution-output').innerHTML = '';
         }
 
         display.textContent = timeLeft;
@@ -446,10 +474,11 @@
                 document.getElementById(`time-select-${mode}`).disabled = false;
                 if(navigator.vibrate) navigator.vibrate(500);
 
-                // Quan acaba el temps, mostrem el panell per introduir la paraula
                 if(mode === 'lletres') {
                     document.getElementById('solution-panel-lletres').style.display = 'block';
                     document.getElementById('user-word-input').focus();
+                } else {
+                    document.getElementById('solution-panel-xifres').style.display = 'block';
                 }
             }
         }, 1000);
@@ -487,11 +516,9 @@
         }
     }
 
-    // --- NOVA FUNCIÓ DE VALIDACIÓ ---
     function checkWord() {
         const input = document.getElementById('user-word-input');
         const resultMsg = document.getElementById('word-result-msg');
-        // Normalitzar: Majúscules i treure espais
         const word = input.value.trim().toUpperCase();
 
         if (word.length === 0) {
@@ -499,20 +526,12 @@
             return;
         }
 
-        // 1. Validació de LLETRES DISPONIBLES
-        // Fem una còpia de les lletres disponibles per anar "tatxant" les que fem servir
         let availablePool = [...state.lletres];
         let lettersValid = true;
-
-        // Gestió especial per L·L i NY si calgués (aquí simplificat caràcter a caràcter)
-        // Nota: Per fer-ho perfecte amb L·L i NY caldria un parser més complex, 
-        // aquí assumim lletra a lletra estàndard.
         
         for (let char of word) {
             const index = availablePool.indexOf(char);
             if (index > -1) {
-                // La lletra existeix, la traiem del 'pool' perquè no es pugui reutilitzar
-                // si no està repetida al tauler
                 availablePool.splice(index, 1);
             } else {
                 lettersValid = false;
@@ -521,21 +540,15 @@
         }
 
         if (!lettersValid) {
-            resultMsg.innerHTML = `<div class="result-message result-error">❌ La paraula conté lletres que no són al tauler o les repeteix massa cops.</div>`;
+            resultMsg.innerHTML = `<div class="result-message result-error">❌ La paraula conté lletres que no són al tauler.</div>`;
             return;
         }
 
-        // 2. Validació de DICCIONARI
-        // Aquí comprovem contra la llista 'dummy'. 
-        // En producció, aquí faries: fetch('api/valida/' + word)
-        
         const inDictionary = MOCK_DICTIONARY.includes(word);
-
         if (inDictionary) {
             resultMsg.innerHTML = `<div class="result-message result-success">✅ CORRECTE! <br> Paraula vàlida de ${word.length} lletres.</div>`;
         } else {
-            // Si no està a la llista de mostra, avisem que és una llista limitada
-            resultMsg.innerHTML = `<div class="result-message result-error">⚠️ La paraula utilitza les fitxes correctes, però no la tinc al meu petit diccionari de mostra.<br><small>(Prova amb CASA, GAT, SOL, ORDINADOR...)</small></div>`;
+            resultMsg.innerHTML = `<div class="result-message result-error">⚠️ Lletres correctes, però no la tinc al diccionari de mostra.</div>`;
         }
     }
 
@@ -547,15 +560,21 @@
         let poolPetits = [...PETITS].sort(() => 0.5 - Math.random());
         selection = selection.concat(poolPetits.slice(0, numPetits));
         state.xifres = selection.sort(() => 0.5 - Math.random());
-        const target = Math.floor(Math.random() * (999 - 101 + 1) + 101);
-        renderNumbersUI(target);
+        
+        // Target 101-999
+        state.xifresTarget = Math.floor(Math.random() * (999 - 101 + 1) + 101);
+        
+        renderNumbersUI();
+        
         document.getElementById('numbers-selection-panel').style.display = 'none';
         document.getElementById('numbers-reset-panel').style.display = 'block';
         document.getElementById('start-xifres').disabled = false;
+        document.getElementById('solution-panel-xifres').style.display = 'none';
+        document.getElementById('math-solution-output').innerHTML = '';
     }
 
-    function renderNumbersUI(target) {
-        document.getElementById('target-display').textContent = target;
+    function renderNumbersUI() {
+        document.getElementById('target-display').textContent = state.xifresTarget;
         const container = document.getElementById('numbers-container');
         container.innerHTML = '';
         state.xifres.forEach(n => {
@@ -564,6 +583,104 @@
             div.textContent = n;
             container.appendChild(div);
         });
+    }
+
+    // --- SOLUCIONADOR MATEMÀTIC (ALGORISME RECURSIU) ---
+    function findMathSolution() {
+        const target = state.xifresTarget;
+        const nums = state.xifres;
+        const outputDiv = document.getElementById('math-solution-output');
+        
+        outputDiv.innerHTML = "Calculant...";
+
+        // Petit retard per permetre que la UI es mostri abans del càlcul intensiu
+        setTimeout(() => {
+            const result = solveCountdown(nums, target);
+            
+            if (result) {
+                let html = `<div class="steps-list">`;
+                if (result.value === target) {
+                    html += `<div style="color:green; font-weight:bold;">✅ Exacte! (${target})</div>`;
+                } else {
+                    html += `<div style="color:#eab308; font-weight:bold;">⚠️ Aproximació: ${result.value} (Objectiu: ${target})</div>`;
+                }
+                
+                result.steps.forEach(step => {
+                    html += `<div>${step}</div>`;
+                });
+                html += `</div>`;
+                outputDiv.innerHTML = html;
+            } else {
+                outputDiv.innerHTML = `<div class="result-message result-error">No s'ha trobat cap solució propera.</div>`;
+            }
+        }, 50);
+    }
+
+    function solveCountdown(numbers, target) {
+        let bestDiff = Infinity;
+        let bestSolution = null;
+
+        // Estructura per guardar estat de la cerca:
+        // currentValues: array d'objectes { val: number, history: array de strings }
+        
+        function recurse(currentItems) {
+            // Comprovar si tenim el millor resultat fins ara
+            for (let item of currentItems) {
+                let diff = Math.abs(target - item.val);
+                if (diff < bestDiff) {
+                    bestDiff = diff;
+                    bestSolution = { value: item.val, steps: item.history };
+                    if (bestDiff === 0) return true; // Trobada solució exacta
+                }
+            }
+
+            if (currentItems.length <= 1) return false;
+
+            // Provar totes les parelles
+            for (let i = 0; i < currentItems.length; i++) {
+                for (let j = 0; j < currentItems.length; j++) {
+                    if (i === j) continue;
+
+                    let a = currentItems[i];
+                    let b = currentItems[j];
+
+                    // Optimització: Només processar parelles en un ordre per operacions commutatives (+) i (*)
+                    // Però per (-) i (/) l'ordre importa.
+                    // Per simplificar i podar l'arbre, forcem j > i per a commutatives
+                    
+                    let remaining = [];
+                    for (let k = 0; k < currentItems.length; k++) {
+                        if (k !== i && k !== j) remaining.push(currentItems[k]);
+                    }
+
+                    // Operacions
+                    const ops = [
+                        { op: '+', val: a.val + b.val, valid: true },
+                        { op: '-', val: a.val - b.val, valid: a.val > b.val }, // No negatius
+                        { op: '*', val: a.val * b.val, valid: b.val !== 1 && a.val !== 1 }, // x1 és redundant
+                        { op: '/', val: a.val / b.val, valid: b.val > 1 && a.val % b.val === 0 } // Divisió exacta
+                    ];
+
+                    for (let op of ops) {
+                        if (op.valid) {
+                            // Commutativitat: si és suma o multi, només fem si i < j per evitar duplicats (a+b vs b+a)
+                            if ((op.op === '+' || op.op === '*') && i > j) continue;
+
+                            let newHistory = [...a.history, ...b.history, `${a.val} ${op.op} ${b.val} = ${op.val}`];
+                            let newItem = { val: op.val, history: newHistory };
+                            
+                            if (recurse([...remaining, newItem])) return true; // Sortida ràpida si trobem exacte
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        // Inicialitzar ítems amb historial buit
+        let initialItems = numbers.map(n => ({ val: n, history: [] }));
+        recurse(initialItems);
+        return bestSolution;
     }
 
     // --- REINICIAR ---
@@ -593,6 +710,8 @@
             }
             document.getElementById('numbers-selection-panel').style.display = 'block';
             document.getElementById('numbers-reset-panel').style.display = 'none';
+            document.getElementById('solution-panel-xifres').style.display = 'none';
+            document.getElementById('math-solution-output').innerHTML = '';
             document.getElementById('start-xifres').disabled = true;
         }
     }
