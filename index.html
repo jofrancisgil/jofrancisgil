@@ -3,143 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jo Recursos - Portal Educatiu</title>
-    <meta name="description" content="Recursos educatius per a primària.">
+    <title>Jo Recursos - Portal Educatiu Interactiu</title>
+    <meta name="description" content="Recursos educatius innovadors per a primària.">
     
-    <!-- Estils Tailwind CSS -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Icones (Font Awesome) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Tipografia Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Icones Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         h1, h2, h3, .brand-font { font-family: 'Fredoka', sans-serif; }
         
-        /* Patró de fons subtil */
-        .hero-pattern {
-            background-color: #f0f9ff;
-            background-image: radial-gradient(#bae6fd 1px, transparent 1px);
-            background-size: 20px 20px;
+        /* Animacions d'entrada */
+        .animate-fade-up { animation: fadeUp 0.6s ease-out forwards; opacity: 0; transform: translateY(20px); }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Efecte de fons abstracte */
+        .blob {
+            position: absolute;
+            filter: blur(40px);
+            z-index: -1;
+            opacity: 0.4;
+            animation: move 10s infinite alternate;
+        }
+        @keyframes move {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(20px, -20px) scale(1.1); }
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+<body class="text-slate-800 min-h-screen flex flex-col overflow-x-hidden relative">
+
+    <!-- Fons Decoratiu -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden">
+        <div class="blob bg-blue-300 w-96 h-96 rounded-full top-0 left-0 -translate-x-1/2 -translate-y-1/2"></div>
+        <div class="blob bg-purple-300 w-96 h-96 rounded-full bottom-0 right-0 translate-x-1/3 translate-y-1/3"></div>
+    </div>
 
     <!-- Barra de Navegació -->
-    <nav class="bg-white shadow-md sticky top-0 z-50">
+    <nav class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20">
-                <!-- Logotip / Enllaç Inici -->
-                <a href="index.html" class="flex items-center group">
-                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white text-xl mr-3 shadow-sm group-hover:bg-blue-700 transition">
-                        <i class="fas fa-shapes"></i>
+            <div class="flex justify-between h-20 items-center">
+                <a href="index.html" class="flex items-center gap-2 group">
+                    <div class="p-2 bg-indigo-600 rounded-xl text-white transform group-hover:rotate-12 transition duration-300 shadow-lg shadow-indigo-200">
+                        <i data-lucide="shapes" class="w-6 h-6"></i>
                     </div>
-                    <span class="text-2xl font-bold text-gray-800 brand-font ml-2 group-hover:text-blue-800 transition">Jo Recursos</span>
+                    <span class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 brand-font">Jo Recursos</span>
                 </a>
                 
-                <!-- Menú d'escriptori -->
-                <div class="hidden md:flex items-center space-x-4">
-                    <a href="llengues.html" class="text-gray-600 hover:text-blue-600 font-medium transition px-3 py-2 hover:bg-blue-50 rounded-md">Llengües</a>
-                    <a href="matematiques.html" class="text-gray-600 hover:text-blue-600 font-medium transition px-3 py-2 hover:bg-blue-50 rounded-md">Mates</a>
-                    <a href="medi.html" class="text-gray-600 hover:text-blue-600 font-medium transition px-3 py-2 hover:bg-blue-50 rounded-md">Medi</a>
-                    <a href="jocs.html" class="text-gray-600 hover:text-purple-600 font-medium transition px-3 py-2 hover:bg-purple-50 rounded-md">Jocs</a>
-                    <a href="gestio.html" class="text-gray-600 hover:text-blue-600 font-medium transition px-3 py-2 hover:bg-blue-50 rounded-md">Gestió</a>
-                </div>
-
-                <!-- Botó menú mòbil (Visual) -->
-                <div class="flex items-center md:hidden">
-                    <button class="text-gray-600 hover:text-blue-600 focus:outline-none">
-                        <i class="fas fa-bars text-2xl"></i>
-                    </button>
+                <!-- Menú Escriptori -->
+                <div class="hidden md:flex space-x-1">
+                    <a href="llengues.html" class="px-4 py-2 rounded-full font-bold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition">Llengües</a>
+                    <a href="matematiques.html" class="px-4 py-2 rounded-full font-bold text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition">Mates</a>
+                    <a href="medi.html" class="px-4 py-2 rounded-full font-bold text-slate-600 hover:text-green-600 hover:bg-green-50 transition">Medi</a>
+                    <a href="jocs.html" class="px-4 py-2 rounded-full font-bold text-slate-600 hover:text-purple-600 hover:bg-purple-50 transition">Jocs</a>
+                    <a href="gestio.html" class="px-4 py-2 rounded-full font-bold text-slate-600 hover:text-orange-600 hover:bg-orange-50 transition">Gestió</a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Principal (Portada) -->
-    <header class="hero-pattern py-24 text-center px-4">
-        <h1 class="text-5xl md:text-6xl font-extrabold text-blue-900 mb-6 tracking-tight">
-            Benvinguts a Jo Recursos
-        </h1>
-        <p class="text-xl text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Un espai on compartir, aprendre i créixer. Selecciona una àrea per començar a navegar pels materials educatius.
-        </p>
-        <div class="flex flex-wrap justify-center gap-4">
-            <a href="llengues.html" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition transform hover:-translate-y-1 flex items-center gap-2">
-                <i class="fas fa-book-open"></i> Explorar Llengües
-            </a>
-            <a href="jocs.html" class="bg-purple-500 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-purple-600 transition transform hover:-translate-y-1 flex items-center gap-2">
-                <i class="fas fa-gamepad"></i> Zona de Jocs
-            </a>
+    <!-- Contingut Principal -->
+    <main class="flex-grow pt-10 pb-20 px-4">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- HERO SECTION -->
+            <div class="text-center mb-16 animate-fade-up">
+                <h1 class="text-5xl md:text-7xl font-extrabold text-slate-900 mb-6 tracking-tight leading-tight">
+                    Aprèn, Crea i <br>
+                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">Diverteix-te a l'Aula</span>
+                </h1>
+                <p class="text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
+                    Eines digitals, jocs interactius i generadors automàtics amb intel·ligència artificial per a mestres i alumnes.
+                </p>
+            </div>
+
+            <!-- SECCIÓ DESTACATS (TOP APPS) -->
+            <div class="mb-20 animate-fade-up delay-100">
+                <div class="flex items-center gap-3 mb-8">
+                    <i data-lucide="sparkles" class="text-yellow-500 w-6 h-6"></i>
+                    <h2 class="text-2xl font-bold text-slate-800">Top Eines & Jocs</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    
+                    <!-- 1. Generador Informes IA (ESTIL PREMIUM/MAGIC) -->
+                    <a href="https://gemini.google.com/share/67a77bf01572" target="_blank" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 p-1">
+                        <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl group-hover:scale-150 transition duration-500"></div>
+                        <div class="bg-white/10 backdrop-blur-sm h-full p-6 rounded-[20px] flex flex-col border border-white/20">
+                            <div class="mb-4 p-3 bg-white/20 rounded-2xl w-fit group-hover:rotate-6 transition duration-300">
+                                <i data-lucide="wand-2" class="w-8 h-8 text-white"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">Informes amb IA</h3>
+                            <p class="text-blue-100 text-sm mb-4 flex-grow">Redacta informes d'alumnes en segons amb la potència de la IA.</p>
+                            <div class="flex items-center text-xs font-bold uppercase tracking-wider text-blue-200 group-hover:text-white transition">
+                                Provar Eina <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- 2. Generador Rúbriques (ESTIL TECNOLÒGIC) -->
+                    <a href="https://gemini.google.com/share/540004f22030" target="_blank" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600 to-fuchsia-700 text-white shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 p-1">
+                        <div class="absolute bottom-0 left-0 -mb-4 -ml-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl group-hover:scale-150 transition duration-500"></div>
+                        <div class="bg-white/10 backdrop-blur-sm h-full p-6 rounded-[20px] flex flex-col border border-white/20">
+                            <div class="mb-4 p-3 bg-white/20 rounded-2xl w-fit group-hover:rotate-6 transition duration-300">
+                                <i data-lucide="list-checks" class="w-8 h-8 text-white"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">Rúbriques IA</h3>
+                            <p class="text-purple-100 text-sm mb-4 flex-grow">Crea graelles d'avaluació detallades automàticament.</p>
+                            <div class="flex items-center text-xs font-bold uppercase tracking-wider text-purple-200 group-hover:text-white transition">
+                                Generar Ara <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- 3. Caixes Secretes (ESTIL JOC/MISTERI) -->
+                    <a href="caixes.html" class="group relative overflow-hidden rounded-3xl bg-white border border-slate-200 shadow-lg hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col">
+                        <div class="h-32 bg-emerald-100 flex items-center justify-center relative overflow-hidden">
+                            <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                            <i data-lucide="box" class="w-16 h-16 text-emerald-600 group-hover:scale-110 transition duration-300"></i>
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="text-xl font-bold text-slate-800 mb-2">Caixes Secretes</h3>
+                            <p class="text-slate-500 text-sm flex-grow">Practica operacions matemàtiques descobrint el resultat amagat.</p>
+                            <span class="mt-4 text-emerald-600 font-bold text-sm group-hover:underline">Jugar ara →</span>
+                        </div>
+                    </a>
+
+                    <!-- 4. Xifres i Lletres (ESTIL TV/RETRO) -->
+                    <a href="xifresilletres.html" class="group relative overflow-hidden rounded-3xl bg-white border border-slate-200 shadow-lg hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col">
+                        <div class="h-32 bg-blue-100 flex items-center justify-center relative overflow-hidden">
+                            <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                            <div class="flex gap-2">
+                                <span class="bg-blue-600 text-white font-bold p-2 rounded-lg text-xl shadow-lg transform -rotate-6">A</span>
+                                <span class="bg-blue-600 text-white font-bold p-2 rounded-lg text-xl shadow-lg transform rotate-6">7</span>
+                            </div>
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="text-xl font-bold text-slate-800 mb-2">Xifres i Lletres</h3>
+                            <p class="text-slate-500 text-sm flex-grow">El clàssic concurs d'agilitat mental i càlcul.</p>
+                            <span class="mt-4 text-blue-600 font-bold text-sm group-hover:underline">Jugar ara →</span>
+                        </div>
+                    </a>
+
+                </div>
+            </div>
+
+            <!-- SECCIÓ CATEGORIES -->
+            <div class="animate-fade-up delay-200">
+                <div class="flex items-center gap-3 mb-8">
+                    <i data-lucide="layout-grid" class="text-slate-400 w-6 h-6"></i>
+                    <h2 class="text-2xl font-bold text-slate-800">Explora per Categories</h2>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    
+                    <a href="llengues.html" class="group p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition text-center">
+                        <div class="w-12 h-12 mx-auto bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-3 group-hover:bg-indigo-600 group-hover:text-white transition duration-300">
+                            <i data-lucide="book-open" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-700">Llengües</h3>
+                    </a>
+
+                    <a href="matematiques.html" class="group p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition text-center">
+                        <div class="w-12 h-12 mx-auto bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:bg-emerald-600 group-hover:text-white transition duration-300">
+                            <i data-lucide="calculator" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-700">Matemàtiques</h3>
+                    </a>
+
+                    <a href="medi.html" class="group p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-green-200 transition text-center">
+                        <div class="w-12 h-12 mx-auto bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-3 group-hover:bg-green-600 group-hover:text-white transition duration-300">
+                            <i data-lucide="leaf" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-700">Medi</h3>
+                    </a>
+
+                    <a href="jocs.html" class="group p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-purple-200 transition text-center">
+                        <div class="w-12 h-12 mx-auto bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mb-3 group-hover:bg-purple-600 group-hover:text-white transition duration-300">
+                            <i data-lucide="gamepad-2" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-700">Zona Jocs</h3>
+                    </a>
+
+                    <a href="gestio.html" class="group p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-orange-200 transition text-center">
+                        <div class="w-12 h-12 mx-auto bg-orange-50 text-orange-600 rounded-full flex items-center justify-center mb-3 group-hover:bg-orange-600 group-hover:text-white transition duration-300">
+                            <i data-lucide="settings" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-700">Gestió</h3>
+                    </a>
+
+                </div>
+            </div>
+
         </div>
-    </header>
+    </main>
 
-    <!-- Targetes d'Accés Ràpid (Seccions) -->
-    <section class="max-w-6xl mx-auto px-4 py-16">
-        <div class="grid md:grid-cols-3 gap-8">
-            
-            <!-- Targeta Llengües -->
-            <a href="llengues.html" class="group bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center hover:shadow-md hover:border-blue-200 transition block h-full">
-                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition duration-300">
-                    <i class="fas fa-language"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-3 text-gray-800 group-hover:text-blue-700 transition">Llengües</h3>
-                <p class="text-gray-600">Recursos de català, castellà i anglès.</p>
-            </a>
-
-            <!-- Targeta Matemàtiques -->
-            <a href="matematiques.html" class="group bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center hover:shadow-md hover:border-emerald-200 transition block h-full">
-                <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition duration-300">
-                    <i class="fas fa-calculator"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-3 text-gray-800 group-hover:text-emerald-700 transition">Matemàtiques</h3>
-                <p class="text-gray-600">Càlcul, geometria i resolució de problemes.</p>
-            </a>
-
-            <!-- Targeta Jocs (NOVA) -->
-            <a href="jocs.html" class="group bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center hover:shadow-md hover:border-purple-200 transition block h-full">
-                <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition duration-300">
-                    <i class="fas fa-puzzle-piece"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-3 text-gray-800 group-hover:text-purple-700 transition">Jocs Interactius</h3>
-                <p class="text-gray-600">Sopes de lletres, Memory i passatemps educatius.</p>
-            </a>
-
-            <!-- Targeta Medi -->
-            <a href="medi.html" class="group bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center hover:shadow-md hover:border-green-200 transition block h-full">
-                <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition duration-300">
-                    <i class="fas fa-leaf"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-3 text-gray-800 group-hover:text-green-700 transition">Medi</h3>
-                <p class="text-gray-600">Coneixement del medi natural i social.</p>
-            </a>
-
-            <!-- Targeta Gestió -->
-            <a href="gestio.html" class="group bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center hover:shadow-md hover:border-orange-200 transition block h-full">
-                <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition duration-300">
-                    <i class="fas fa-users-cog"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-3 text-gray-800 group-hover:text-orange-700 transition">Gestió d'Aula</h3>
-                <p class="text-gray-600">Generador de Grups i Codis QR.</p>
-            </a>
-
-        </div>
-    </section>
-
-    <!-- Peu de pàgina -->
-    <footer class="bg-white border-t py-8 mt-auto">
-        <div class="max-w-6xl mx-auto px-4 text-center flex flex-col md:flex-row justify-between items-center gap-4 text-gray-500 text-sm">
-            <p>&copy; 2025 Jo Recursos. Fet amb il·lusió per a l'educació.</p>
+    <!-- Footer Simple -->
+    <footer class="bg-white border-t border-slate-100 py-8 text-center text-slate-400 text-sm">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p>&copy; 2025 Jo Recursos. Fet amb ❤️ per a l'educació.</p>
             <div class="flex gap-4">
-                <a href="#" class="hover:text-blue-600 transition"><i class="fab fa-twitter text-lg"></i></a>
-                <a href="#" class="hover:text-blue-600 transition"><i class="fab fa-instagram text-lg"></i></a>
+                <span class="hover:text-indigo-600 cursor-pointer transition"><i data-lucide="github" class="w-4 h-4"></i></span>
+                <span class="hover:text-indigo-600 cursor-pointer transition"><i data-lucide="twitter" class="w-4 h-4"></i></span>
             </div>
         </div>
     </footer>
 
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>
