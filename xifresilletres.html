@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xifres i Lletres - Versió TV</title>
+    <style>
+        :root {
+            --primary: #1e3a8a; /* Blau fosc */
+            --secondary: #3b82f6; /* Blau clar */
+            --accent: #f59e0b; /* Groc/Taronja */
+            --danger: #ef4444;
+            --success: #22c55e;
+            --bg: #f3f4f6;
+            --text: #1f2937;
+            --panel-bg: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 650px;
+            text-align: center;
+        }
+
+        h1 { 
+            color: var(--primary); 
+            margin-bottom: 0.5rem; 
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* NAVEGACIÓ (Pestanyes) */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+            background: var(--panel-bg);
+            padding: 5px;
+            border-radius: 10px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: #64748b;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* ÀREES DE JOC */
+        .game-section { display: none; animation: fadeIn 0.3s; }
+        .game-section.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ZONA VISUALITZACIÓ */
+        .display-area {
+            background: var(--primary);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+        }
+
+        /* FITXES (TILES) */
+        .tiles-row {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            min-height: 60px;
+        }
+
+        .tile {
+            background: linear-gradient(to bottom, #ffffff, #f1f5f9);
+            color: var(--primary);
+            width: 50px;
+            height: 55px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.6rem;
+            font-weight: 800;
+            border-radius: 6px;
+            box-shadow: 0 4px 0 #94a3b8;
+            user-select: none;
+        }
+        
+        .tile.blue {
+            background: linear-gradient(to bottom, #3b82f6, #2563eb);
+            color: white;
+            box-shadow: 0 4px 0 #1e40af;
+        }
+
+        /* NÚMERO OBJECTIU */
+        .target-box {
+            background: black;
+            color: #39ff14; /* Verd retro */
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 3rem;
+            font-weight: bold;
+            padding: 10px 30px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-bottom: 20px;
+            border: 4px solid #333;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.2);
+        }
+
+        /* BOTONS I CONTROL */
+        .controls-group {
+            margin-bottom: 20px;
+        }
+        
+        .selection-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        button.action-btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.1s, background 0.2s;
+            box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+        }
+
+        button.action-btn:hover { background: #2563eb; }
+        button.action-btn:active { transform: translateY(2px); }
+        button.action-btn:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; transform: none; }
+        
+        button.reset-btn { background: #ef4444; }
+        button.reset-btn:hover { background: #dc2626; }
+
+        button.select-num-btn {
+            background: white;
+            border: 2px solid var(--secondary);
+            color: var(--secondary);
+        }
+        button.select-num-btn:hover { background: #eff6ff; }
+
+        /* TEMPORITZADOR */
+        .timer-container {
+            margin: 20px auto;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 5px solid var(--primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            background: white;
+        }
+        
+        .timer-container.urgent {
+            border-color: var(--danger);
+            color: var(--danger);
+            animation: pulse 1s infinite;
+        }
+
+        /* Time Selector */
+        .time-selector {
+            margin-bottom: 10px;
+        }
+        
+        .time-selector select {
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid #cbd5e1;
+            font-size: 1rem;
+            color: var(--text);
+            cursor: pointer;
+            background: white;
+        }
+
+        /* PANELL SOLUCIÓ (NOU) */
+        .solution-panel {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            margin-top: 20px;
+            display: none; /* Ocult d'inici */
+        }
+
+        .solution-input-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .solution-input {
+            padding: 10px;
+            font-size: 1.2rem;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            width: 60%;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        .result-message {
+            font-weight: bold;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .result-success { background: #dcfce7; color: #166534; }
+        .result-error { background: #fee2e2; color: #991b1b; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Xifres i Lletres</h1>
+    <p class="subtitle">Entrena el teu cervell</p>
+
+    <!-- NAVEGACIÓ -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('lletres')">🔤 Lletres</button>
+        <button class="tab-btn" onclick="switchTab('xifres')">🔢 Xifres</button>
+    </div>
+
+    <!-- SECCIÓ LLETRES -->
+    <div id="lletres" class="game-section active">
+        <div class="display-area">
+            <div class="tiles-row" id="letters-container">
+                <!-- Les lletres es generaran aquí -->
+                <div class="tile" style="opacity:0.3">?</div>
+                <div class="tile" style="opacity:0.3">?</div>
+                <div class="tile" style="opacity:0.3">?</div>
+                <div class="tile" style="opacity:0.3">?</div>
+                <div class="tile" style="opacity:0.3">?</div>
+                <div class="tile" style="opacity:0.3">?</div>
+                <div class="tile" style="opacity:0.3">?</div>
+                <div class="tile" style="opacity:0.3">?</div>
+                <div class="tile" style="opacity:0.3">?</div>
+            </div>
+        </div>
+        
+        <div class="controls-group" id="letters-controls">
+            <span class="selection-label">Demana una lletra:</span>
+            <div class="btn-group">
+                <button onclick="addLetter('vocal')" class="action-btn" id="btn-vocal">Vocal</button>
+                <button onclick="addLetter('consonant')" class="action-btn" id="btn-consonant">Consonant</button>
+                <button onclick="resetGame('lletres')" class="action-btn reset-btn">🗑️ Esborrar</button>
+            </div>
+        </div>
+
+        <div class="timer-container" id="timer-lletres">45</div>
+        <div class="time-selector">
+            <label for="time-select-lletres">Temps:</label>
+            <select id="time-select-lletres" onchange="updateTimerDisplay('lletres')">
+                <option value="45" selected>45s</option>
+                <option value="60">60s</option>
+                <option value="90">90s</option>
+                <option value="120">120s</option>
+            </select>
+        </div>
+        <button onclick="startTimer('lletres')" class="action-btn" id="start-lletres" disabled>⏱️ Començar Temps</button>
+
+        <!-- PANELL DE SOLUCIÓ (LLETRES) -->
+        <div id="solution-panel-lletres" class="solution-panel">
+            <p>S'ha acabat el temps! Quina paraula has trobat?</p>
+            <div class="solution-input-group">
+                <input type="text" id="user-word-input" class="solution-input" placeholder="PARAULA" onkeydown="if(event.key==='Enter') checkWord()">
+                <button onclick="checkWord()" class="action-btn">Comprovar</button>
+            </div>
+            <div id="word-result-msg"></div>
+        </div>
+    </div>
+
+    <!-- SECCIÓ XIFRES -->
+    <div id="xifres" class="game-section">
+        <div class="display-area">
+            <div id="target-display" class="target-box">000</div>
+            <div class="tiles-row" id="numbers-container">
+                <div class="tile blue">?</div>
+                <div class="tile blue">?</div>
+                <div class="tile blue">?</div>
+                <div class="tile blue">?</div>
+                <div class="tile blue">?</div>
+                <div class="tile blue">?</div>
+            </div>
+        </div>
+
+        <div class="controls-group" id="numbers-selection-panel">
+            <span class="selection-label">Quants "de dalt" (25, 50, 75, 100) vols?</span>
+            <div class="btn-group">
+                <button onclick="setupNumbers(0)" class="action-btn select-num-btn">Cap</button>
+                <button onclick="setupNumbers(1)" class="action-btn select-num-btn">1 de dalt</button>
+                <button onclick="setupNumbers(2)" class="action-btn select-num-btn">2 de dalt</button>
+                <button onclick="setupNumbers(3)" class="action-btn select-num-btn">3 de dalt</button>
+                <button onclick="setupNumbers(4)" class="action-btn select-num-btn">4 de dalt</button>
+            </div>
+        </div>
+        
+        <div class="controls-group" id="numbers-reset-panel" style="display:none;">
+             <button onclick="resetGame('xifres')" class="action-btn reset-btn">🔄 Nova Partida</button>
+        </div>
+
+        <div class="timer-container" id="timer-xifres">45</div>
+        <div class="time-selector">
+            <label for="time-select-xifres">Temps:</label>
+            <select id="time-select-xifres" onchange="updateTimerDisplay('xifres')">
+                <option value="45" selected>45s</option>
+                <option value="60">60s</option>
+                <option value="90">90s</option>
+                <option value="120">120s</option>
+            </select>
+        </div>
+        <button onclick="startTimer('xifres')" class="action-btn" id="start-xifres" disabled>⏱️ Començar Temps</button>
+    </div>
+</div>
+
+<script>
+    // --- DADES DEL JOC ---
+    const VOCALS = ['A','A','A','A','E','E','E','E','E','I','I','I','O','O','O','U','U'];
+    const CONSONANTS = ['B','B','C','C','D','D','F','G','H','J','L','L','M','M','N','N','N','P','P','Q','R','R','R','S','S','S','T','T','V','X','Z','NY','L·L'];
+    const GRANS = [25, 50, 75, 100];
+    const PETITS = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10];
+
+    // --- PETIT DICCIONARI DE MOSTRA (Per testejar sense API externa) ---
+    // En un entorn real, això es faria amb una crida a un fitxer .json extern o API
+    const MOCK_DICTIONARY = [
+        "CASA", "GAT", "GOS", "TAULA", "CADIRA", "ORDINADOR", "JOC", "XIFRES", 
+        "LLETRES", "CATALA", "SOL", "LLUNA", "CEL", "TERRA", "MAR", "FOC", 
+        "AIGUA", "AIRE", "VIDA", "MORT", "AMOR", "PAU", "GUERRA", "TEMPS",
+        "ESCOLA", "LLIBRE", "PAPER", "BOLIGRAF", "LLAPIS", "GOMA", "ESTIU"
+    ];
+
+    // Estat
+    let state = {
+        lletres: [],
+        xifres: [],
+        interval: null,
+        mode: 'lletres'
+    };
+
+    // --- FUNCIONS GENERALS ---
+    function switchTab(tab) {
+        state.mode = tab;
+        document.querySelectorAll('.game-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tab).classList.add('active');
+        document.querySelector(`button[onclick="switchTab('${tab}')"]`).classList.add('active');
+        stopTimer();
+    }
+    
+    function updateTimerDisplay(mode) {
+        if (state.interval) clearInterval(state.interval);
+        const selectedTime = document.getElementById(`time-select-${mode}`).value;
+        const display = document.getElementById(`timer-${mode}`);
+        display.textContent = selectedTime;
+        display.classList.remove('urgent');
+    }
+
+    function stopTimer() {
+        if (state.interval) clearInterval(state.interval);
+        
+        // Reset display to selected values if needed...
+        document.getElementById('timer-lletres').classList.remove('urgent');
+        document.getElementById('timer-xifres').classList.remove('urgent');
+    }
+
+    function startTimer(mode) {
+        stopTimer();
+        let timeLeft = parseInt(document.getElementById(`time-select-${mode}`).value);
+        const display = document.getElementById(`timer-${mode}`);
+        
+        // Reset UI if needed
+        if(mode === 'lletres') {
+            document.getElementById('solution-panel-lletres').style.display = 'none';
+            document.getElementById('word-result-msg').innerHTML = '';
+            document.getElementById('user-word-input').value = '';
+        }
+
+        display.textContent = timeLeft;
+        document.getElementById(`time-select-${mode}`).disabled = true;
+
+        state.interval = setInterval(() => {
+            timeLeft--;
+            display.textContent = timeLeft;
+            
+            if (timeLeft <= 10) display.classList.add('urgent');
+            
+            if (timeLeft <= 0) {
+                clearInterval(state.interval);
+                display.textContent = "0";
+                document.getElementById(`time-select-${mode}`).disabled = false;
+                if(navigator.vibrate) navigator.vibrate(500);
+
+                // Quan acaba el temps, mostrem el panell per introduir la paraula
+                if(mode === 'lletres') {
+                    document.getElementById('solution-panel-lletres').style.display = 'block';
+                    document.getElementById('user-word-input').focus();
+                }
+            }
+        }, 1000);
+    }
+
+    // --- LÒGICA DE LLETRES ---
+    function addLetter(type) {
+        if (state.lletres.length >= 9) return;
+        const source = type === 'vocal' ? VOCALS : CONSONANTS;
+        const letter = source[Math.floor(Math.random() * source.length)];
+        state.lletres.push(letter);
+        updateLettersUI();
+        if (state.lletres.length === 9) {
+            document.getElementById('btn-vocal').disabled = true;
+            document.getElementById('btn-consonant').disabled = true;
+            document.getElementById('start-lletres').disabled = false;
+        }
+    }
+
+    function updateLettersUI() {
+        const container = document.getElementById('letters-container');
+        container.innerHTML = '';
+        state.lletres.forEach(l => {
+            const div = document.createElement('div');
+            div.className = 'tile';
+            div.textContent = l;
+            container.appendChild(div);
+        });
+        for (let i = state.lletres.length; i < 9; i++) {
+            const div = document.createElement('div');
+            div.className = 'tile';
+            div.style.opacity = '0.3';
+            div.textContent = '?';
+            container.appendChild(div);
+        }
+    }
+
+    // --- NOVA FUNCIÓ DE VALIDACIÓ ---
+    function checkWord() {
+        const input = document.getElementById('user-word-input');
+        const resultMsg = document.getElementById('word-result-msg');
+        // Normalitzar: Majúscules i treure espais
+        const word = input.value.trim().toUpperCase();
+
+        if (word.length === 0) {
+            resultMsg.innerHTML = '<div class="result-message result-error">Escriu alguna cosa!</div>';
+            return;
+        }
+
+        // 1. Validació de LLETRES DISPONIBLES
+        // Fem una còpia de les lletres disponibles per anar "tatxant" les que fem servir
+        let availablePool = [...state.lletres];
+        let lettersValid = true;
+
+        // Gestió especial per L·L i NY si calgués (aquí simplificat caràcter a caràcter)
+        // Nota: Per fer-ho perfecte amb L·L i NY caldria un parser més complex, 
+        // aquí assumim lletra a lletra estàndard.
+        
+        for (let char of word) {
+            const index = availablePool.indexOf(char);
+            if (index > -1) {
+                // La lletra existeix, la traiem del 'pool' perquè no es pugui reutilitzar
+                // si no està repetida al tauler
+                availablePool.splice(index, 1);
+            } else {
+                lettersValid = false;
+                break;
+            }
+        }
+
+        if (!lettersValid) {
+            resultMsg.innerHTML = `<div class="result-message result-error">❌ La paraula conté lletres que no són al tauler o les repeteix massa cops.</div>`;
+            return;
+        }
+
+        // 2. Validació de DICCIONARI
+        // Aquí comprovem contra la llista 'dummy'. 
+        // En producció, aquí faries: fetch('api/valida/' + word)
+        
+        const inDictionary = MOCK_DICTIONARY.includes(word);
+
+        if (inDictionary) {
+            resultMsg.innerHTML = `<div class="result-message result-success">✅ CORRECTE! <br> Paraula vàlida de ${word.length} lletres.</div>`;
+        } else {
+            // Si no està a la llista de mostra, avisem que és una llista limitada
+            resultMsg.innerHTML = `<div class="result-message result-error">⚠️ La paraula utilitza les fitxes correctes, però no la tinc al meu petit diccionari de mostra.<br><small>(Prova amb CASA, GAT, SOL, ORDINADOR...)</small></div>`;
+        }
+    }
+
+    // --- LÒGICA DE XIFRES ---
+    function setupNumbers(numGrans) {
+        let poolGrans = [...GRANS].sort(() => 0.5 - Math.random());
+        let selection = poolGrans.slice(0, numGrans);
+        let numPetits = 6 - numGrans;
+        let poolPetits = [...PETITS].sort(() => 0.5 - Math.random());
+        selection = selection.concat(poolPetits.slice(0, numPetits));
+        state.xifres = selection.sort(() => 0.5 - Math.random());
+        const target = Math.floor(Math.random() * (999 - 101 + 1) + 101);
+        renderNumbersUI(target);
+        document.getElementById('numbers-selection-panel').style.display = 'none';
+        document.getElementById('numbers-reset-panel').style.display = 'block';
+        document.getElementById('start-xifres').disabled = false;
+    }
+
+    function renderNumbersUI(target) {
+        document.getElementById('target-display').textContent = target;
+        const container = document.getElementById('numbers-container');
+        container.innerHTML = '';
+        state.xifres.forEach(n => {
+            const div = document.createElement('div');
+            div.className = 'tile blue';
+            div.textContent = n;
+            container.appendChild(div);
+        });
+    }
+
+    // --- REINICIAR ---
+    function resetGame(mode) {
+        stopTimer();
+        document.getElementById(`time-select-${mode}`).disabled = false;
+        updateTimerDisplay(mode);
+
+        if (mode === 'lletres') {
+            state.lletres = [];
+            document.getElementById('btn-vocal').disabled = false;
+            document.getElementById('btn-consonant').disabled = false;
+            document.getElementById('start-lletres').disabled = true;
+            document.getElementById('solution-panel-lletres').style.display = 'none';
+            document.getElementById('word-result-msg').innerHTML = '';
+            updateLettersUI();
+        } else {
+            state.xifres = [];
+            document.getElementById('target-display').textContent = "000";
+            const container = document.getElementById('numbers-container');
+            container.innerHTML = '';
+            for(let i=0; i<6; i++) {
+                const d = document.createElement('div');
+                d.className = 'tile blue';
+                d.textContent = '?';
+                container.appendChild(d);
+            }
+            document.getElementById('numbers-selection-panel').style.display = 'block';
+            document.getElementById('numbers-reset-panel').style.display = 'none';
+            document.getElementById('start-xifres').disabled = true;
+        }
+    }
+    
+    updateLettersUI();
+
+</script>
+
+</body>
+</html>
