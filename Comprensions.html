@@ -1,0 +1,595 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  BookOpen, 
+  Settings, 
+  Printer, 
+  CheckCircle, 
+  RefreshCcw, 
+  FileText, 
+  GraduationCap, 
+  Languages, 
+  Brain,
+  Save,
+  Play,
+  AlertCircle
+} from 'lucide-react';
+
+// --- CONFIGURACIÓ API GEMINI ---
+const apiKey = ""; // S'injecta automàticament en temps d'execució
+
+const callGeminiAPI = async (prompt) => {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+  
+  const payload = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: "OBJECT",
+        properties: {
+          title: { type: "STRING" },
+          content: { type: "STRING" },
+          questions: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: {
+                text: { type: "STRING" },
+                type: { type: "STRING" },
+                correctAnswer: { type: "STRING" },
+                distractors: { 
+                  type: "ARRAY",
+                  items: { type: "STRING" }
+                }
+              },
+              required: ["text", "type", "correctAnswer", "distractors"]
+            }
+          }
+        },
+        required: ["title", "content", "questions"]
+      }
+    }
+  };
+
+  // Backoff exponencial per reintents
+  const delays = [1000, 2000, 4000, 8000, 16000];
+  
+  for (let i = 0; i <= delays.length; i++) {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+      
+      const data = await response.json();
+      return JSON.parse(data.candidates[0].content.parts[0].text);
+      
+    } catch (error) {
+      if (i === delays.length) throw error; // Si és l'últim intent, llança l'error
+      await new Promise(resolve => setTimeout(resolve, delays[i]));
+    }
+  }
+};
+
+// --- COMPONENTS D'UI ---
+
+const Card = ({ children, className = "" }) => (
+  <div className={`bg-white rounded-xl shadow-lg p-6 ${className}`}>
+    {children}
+  </div>
+);
+
+const Button = ({ children, onClick, variant = "primary", className = "", disabled = false, icon: Icon }) => {
+  const baseStyle = "px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2";
+  const variants = {
+    primary: "bg-amber-600 text-white hover:bg-amber-700 shadow-md border border-transparent",
+    secondary: "bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-300",
+    success: "bg-emerald-600 text-white hover:bg-emerald-700 shadow-md",
+    outline: "bg-white text-amber-700 border-2 border-amber-600 hover:bg-amber-50",
+    danger: "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
+  };
+
+  return (
+    <button 
+      onClick={onClick} 
+      disabled={disabled}
+      className={`${baseStyle} ${variants[variant]} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+    >
+      {Icon && <Icon size={18} />}
+      {children}
+    </button>
+  );
+};
+
+export default function ReadingComprehensionGenerator() {
+  // --- ESTAT DE L'APLICACIÓ ---
+  const [step, setStep] = useState('config'); // config, generating, preview, interactive, results
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  
+  const [config, setConfig] = useState({
+    wordCount: 150,
+    language: 'Català',
+    topic: '',
+    textType: 'Explicatiu',
+    stage: 'Primària',
+    grade: '1r',
+    totalQuestions: 4,
+    qTypes: {
+      literal: 2,
+      inferencial: 1,
+      crítica: 1
+    }
+  });
+
+  const [generatedData, setGeneratedData] = useState(null);
+  const [userAnswers, setUserAnswers] = useState({});
+  const [score, setScore] = useState(null);
+
+  // --- LLISTATS DE CURSOS ---
+  const coursesPrimary = ['1r', '2n', '3r', '4t', '5è', '6è'];
+  const coursesSecondary = ['1r ESO', '2n ESO', '3r ESO', '4t ESO', 'Batxillerat'];
+
+  // --- HANDLERS ---
+  const handleConfigChange = (field, value) => {
+    setConfig(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleQTypeChange = (type, value) => {
+    const newVal = parseInt(value) || 0;
+    setConfig(prev => ({
+      ...prev,
+      qTypes: { ...prev.qTypes, [type]: newVal }
+    }));
+  };
+
+  // Actualitzar total de preguntes automàticament
+  useEffect(() => {
+    const total = config.qTypes.literal + config.qTypes.inferencial + config.qTypes.crítica;
+    if (total !== config.totalQuestions) {
+      handleConfigChange('totalQuestions', total);
+    }
+  }, [config.qTypes]);
+
+  const handleGenerate = async () => {
+    if (!config.topic) {
+      alert("Si us plau, introdueix una temàtica.");
+      return;
+    }
+    
+    setLoading(true);
+    setStep('generating');
+    setErrorMsg('');
+
+    // Construcció del prompt per a Gemini
+    const prompt = `
+      Ets un expert docent. Genera un exercici de comprensió lectora en format JSON estricte.
+      
+      PARÀMETRES:
+      - Idioma: ${config.language}
+      - Tema: ${config.topic}
+      - Tipus de text: ${config.textType}
+      - Nivell escolar: ${config.stage} (${config.grade})
+      - Longitud aproximada: ${config.wordCount} paraules
+      - Preguntes a generar:
+        * ${config.qTypes.literal} preguntes literals
+        * ${config.qTypes.inferencial} preguntes inferencials
+        * ${config.qTypes.crítica} preguntes crítiques
+      
+      ESTRUCTURA DE RESPOSTA JSON DESITJADA:
+      {
+        "title": "Títol creatiu",
+        "content": "Text complet...",
+        "questions": [
+          {
+            "type": "literal|inferencial|crítica",
+            "text": "Enunciat de la pregunta",
+            "correctAnswer": "Text de la resposta correcta",
+            "distractors": ["Resposta incorrecta 1", "Resposta incorrecta 2", "Resposta incorrecta 3"]
+          }
+        ]
+      }
+      
+      Assegura't que el contingut sigui adequat per a l'edat dels alumnes de ${config.grade}.
+    `;
+
+    try {
+      const rawData = await callGeminiAPI(prompt);
+      
+      // Processar dades per al frontend (barrejar respostes)
+      const processedQuestions = rawData.questions.map((q, index) => {
+        const allOptions = [q.correctAnswer, ...q.distractors];
+        // Barrejar opcions
+        const shuffledOptions = allOptions
+          .map(value => ({ value, sort: Math.random() }))
+          .sort((a, b) => a.sort - b.sort)
+          .map(({ value }) => value);
+        
+        const correctIndex = shuffledOptions.indexOf(q.correctAnswer);
+        const letters = ['A', 'B', 'C', 'D'];
+        
+        return {
+          id: `q-${index}`,
+          text: q.text,
+          type: q.type,
+          options: shuffledOptions,
+          correctOption: letters[correctIndex]
+        };
+      });
+
+      setGeneratedData({
+        title: rawData.title,
+        content: rawData.content,
+        questions: processedQuestions
+      });
+      
+      setStep('preview');
+      setUserAnswers({});
+      setScore(null);
+      
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("No s'ha pogut generar el contingut. Torna-ho a provar o canvia la temàtica.");
+      setStep('config');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAnswerSelect = (qId, optionLetter) => {
+    setUserAnswers(prev => ({ ...prev, [qId]: optionLetter }));
+  };
+
+  const calculateScore = () => {
+    let correct = 0;
+    generatedData.questions.forEach(q => {
+      if (userAnswers[q.id] === q.correctOption) correct++;
+    });
+    setScore((correct / generatedData.questions.length) * 10);
+    setStep('results');
+    window.scrollTo(0,0);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  // --- RENDERITZAT ---
+
+  // 1. PANTALLA DE CÀRREGA
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-orange-50 flex flex-col items-center justify-center p-4">
+        <div className="animate-spin text-amber-600 mb-4">
+          <RefreshCcw size={48} />
+        </div>
+        <h2 className="text-xl font-bold text-stone-700">Generant contingut amb IA...</h2>
+        <p className="text-stone-500 mt-2">Creant un text únic sobre "{config.topic}" en {config.language}</p>
+        <p className="text-xs text-stone-400 mt-4">Això pot trigar uns segons...</p>
+      </div>
+    );
+  }
+
+  // 2. CONFIGURACIÓ
+  if (step === 'config') {
+    return (
+      <div className="min-h-screen bg-stone-50 py-10 px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-10">
+            <h1 className="text-4xl font-bold text-amber-900 mb-2 flex justify-center items-center gap-3">
+              <Brain className="w-10 h-10 text-amber-700" />
+              Generador de Comprensió Lectora
+            </h1>
+            <p className="text-stone-600">Eina intel·ligent amb Gemini AI. Crea, imprimeix o avalua.</p>
+          </div>
+
+          {errorMsg && (
+            <div className="mb-6 p-4 bg-red-50 text-red-700 border border-red-200 rounded-lg flex items-center gap-2">
+              <AlertCircle size={20} />
+              {errorMsg}
+            </div>
+          )}
+
+          <Card className="border-t-4 border-amber-500">
+            <div className="space-y-6">
+              
+              {/* Dades Bàsiques */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Temàtica</label>
+                  <input 
+                    type="text" 
+                    placeholder="Ex: Els volcans, Minecraft, L'Edat Mitjana..."
+                    className="w-full p-2 border border-stone-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-stone-50"
+                    value={config.topic}
+                    onChange={(e) => handleConfigChange('topic', e.target.value)}
+                  />
+                </div>
+                <div>
+                   <label className="block text-sm font-medium text-stone-700 mb-1">Idioma</label>
+                   <div className="flex gap-2">
+                     {['Català', 'Castellà', 'Anglès'].map(lang => (
+                       <button
+                        key={lang}
+                        onClick={() => handleConfigChange('language', lang)}
+                        className={`flex-1 py-2 rounded-md border transition-colors ${config.language === lang ? 'bg-amber-100 border-amber-500 text-amber-900 font-bold' : 'bg-white border-stone-300 text-stone-600 hover:bg-stone-50'}`}
+                       >
+                         {lang}
+                       </button>
+                     ))}
+                   </div>
+                </div>
+              </div>
+
+              {/* Detalls Text */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Tipus de text</label>
+                  <select 
+                    className="w-full p-2 border border-stone-300 rounded-md bg-stone-50 focus:ring-amber-500 focus:border-amber-500"
+                    value={config.textType}
+                    onChange={(e) => handleConfigChange('textType', e.target.value)}
+                  >
+                    <option value="explicatiu">Explicatiu</option>
+                    <option value="narració">Narració</option>
+                    <option value="poema">Poema</option>
+                    <option value="notícia">Notícia</option>
+                    <option value="diàleg">Diàleg</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Etapa</label>
+                  <select 
+                    className="w-full p-2 border border-stone-300 rounded-md bg-stone-50 focus:ring-amber-500 focus:border-amber-500"
+                    value={config.stage}
+                    onChange={(e) => {
+                        const newStage = e.target.value;
+                        let defaultGrade = '1r';
+                        if (newStage === 'Secundària') defaultGrade = '1r ESO';
+                        setConfig(prev => ({...prev, stage: newStage, grade: defaultGrade}));
+                    }}
+                  >
+                    <option value="Primària">Primària</option>
+                    <option value="Secundària">Secundària</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Curs/Classe</label>
+                  <select 
+                    className="w-full p-2 border border-stone-300 rounded-md bg-stone-50 focus:ring-amber-500 focus:border-amber-500"
+                    value={config.grade}
+                    onChange={(e) => handleConfigChange('grade', e.target.value)}
+                  >
+                    {config.stage === 'Primària' && coursesPrimary.map(n => <option key={n} value={n}>{n}</option>)}
+                    {config.stage === 'Secundària' && coursesSecondary.map(n => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              {/* Nombre de paraules MANUAL */}
+              <div className="bg-orange-50 p-4 rounded-lg border border-orange-100">
+                <label className="block text-sm font-medium text-amber-900 mb-2">Nombre de paraules (aprox)</label>
+                <div className="flex items-center gap-4">
+                    <input 
+                      type="number" 
+                      min="50" 
+                      max="2000" 
+                      step="10"
+                      value={config.wordCount}
+                      onChange={(e) => handleConfigChange('wordCount', e.target.value)}
+                      className="w-full md:w-1/3 p-2 border border-amber-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-center font-bold text-amber-900"
+                    />
+                    <span className="text-sm text-stone-500 italic">Introdueix la quantitat manualment</span>
+                </div>
+              </div>
+
+              {/* Configuració Preguntes */}
+              <div className="border-t border-stone-200 pt-4">
+                <h3 className="font-semibold text-stone-800 mb-3 flex items-center gap-2">
+                  <CheckCircle size={18} className="text-amber-600" /> Configuració del Test ({config.totalQuestions} preguntes totals)
+                </h3>
+                <div className="grid grid-cols-3 gap-4">
+                  {['literal', 'inferencial', 'crítica'].map(type => (
+                    <div key={type}>
+                      <label className="block text-xs font-medium uppercase text-stone-500 mb-1">{type}</label>
+                      <input 
+                        type="number" min="0" max="10"
+                        className="w-full p-2 border border-stone-300 rounded-md text-center focus:ring-amber-500 focus:border-amber-500"
+                        value={config.qTypes[type]}
+                        onChange={(e) => handleQTypeChange(type, e.target.value)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-4 flex justify-end">
+                <Button onClick={handleGenerate} icon={BookOpen} className="w-full md:w-auto">
+                  Generar Activitat amb IA
+                </Button>
+              </div>
+
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. VISTA PRELIMINAR / INTERACTIVA / RESULTATS
+  const isInteractive = step === 'interactive' || step === 'results';
+
+  return (
+    <div className="min-h-screen bg-stone-100 print:bg-white print:p-0">
+      
+      {/* BARRA SUPERIOR (NO PRINT) */}
+      <div className="bg-white shadow-sm border-b border-stone-200 p-4 sticky top-0 z-10 no-print">
+        <div className="max-w-5xl mx-auto flex flex-wrap justify-between items-center gap-4">
+          <div className="flex items-center gap-2 text-amber-900 font-bold text-lg">
+             <Brain className="text-amber-600"/> Generador CL
+          </div>
+          <div className="flex gap-2">
+            {step === 'preview' && (
+              <>
+                <Button variant="secondary" onClick={() => setStep('config')} icon={Settings}>Editar</Button>
+                <Button variant="outline" onClick={() => setStep('interactive')} icon={Play}>Mode Interactiu</Button>
+                <Button variant="primary" onClick={handlePrint} icon={Printer}>Imprimir</Button>
+              </>
+            )}
+            {isInteractive && step !== 'results' && (
+              <Button variant="secondary" onClick={() => setStep('preview')}>Tornar a Vista Prèvia</Button>
+            )}
+            {step === 'results' && (
+              <>
+                 <Button variant="secondary" onClick={() => {setStep('config'); setScore(null);}}>Nou Text</Button>
+                 <Button variant="primary" onClick={handlePrint} icon={Printer}>Imprimir Resultats</Button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* CONTINGUT PRINCIPAL */}
+      <div className="max-w-5xl mx-auto py-8 px-4 print:max-w-none print:p-0 print:m-0">
+        
+        {/* DOCUMENT PER IMPRIMIR / VISUALITZAR */}
+        <div className="bg-white shadow-xl shadow-stone-200 print:shadow-none rounded-xl overflow-hidden print:rounded-none">
+          
+          {/* CAPÇALERA DEL DOCUMENT */}
+          <div className="bg-amber-700 text-white p-8 print:bg-white print:text-black print:p-0 print:mb-6 print:border-b-2 print:border-black">
+            <div className="flex justify-between items-start">
+              <div>
+                <h1 className="text-3xl font-serif font-bold mb-2">{generatedData?.title || "Títol"}</h1>
+                <div className="flex gap-4 text-sm opacity-90 print:text-black font-medium">
+                  <span className="flex items-center gap-1"><BookOpen size={16}/> {config.textType}</span>
+                  <span className="flex items-center gap-1"><GraduationCap size={16}/> {config.grade}</span>
+                  <span className="flex items-center gap-1"><Languages size={16}/> {config.language}</span>
+                </div>
+              </div>
+              {/* Espai per nom en impressió */}
+              <div className="hidden print:block text-right border p-4 w-64 h-24">
+                <p className="text-sm text-gray-500 mb-6">Nom de l'alumne:</p>
+                <p className="text-sm text-gray-500">Data:</p>
+              </div>
+            </div>
+            
+            {step === 'results' && (
+              <div className="mt-6 bg-white text-amber-900 p-4 rounded-lg print:border print:border-black">
+                <p className="text-lg font-bold">Resultat: {score.toFixed(1)} / 10</p>
+              </div>
+            )}
+          </div>
+
+          {/* COS DEL TEXT */}
+          <div className="p-8 print:p-0 print:mt-4 text-justify leading-relaxed text-stone-800 text-lg border-b border-stone-200 print:border-none font-serif whitespace-pre-line">
+            {generatedData?.content}
+          </div>
+
+          {/* TEST / PREGUNTES */}
+          <div className="p-8 bg-orange-50 print:bg-white print:p-0 print:mt-8">
+            <h2 className="text-xl font-bold text-amber-900 mb-6 flex items-center gap-2">
+              <CheckCircle className="text-amber-600 print:hidden" /> Preguntes de comprensió
+            </h2>
+
+            <div className="space-y-8">
+              {generatedData?.questions.map((q, idx) => {
+                const isCorrect = step === 'results' && userAnswers[q.id] === q.correctOption;
+                const isWrong = step === 'results' && userAnswers[q.id] !== q.correctOption;
+                const userAnswer = userAnswers[q.id];
+
+                return (
+                  <div key={q.id} className={`p-4 rounded-lg bg-white shadow-sm border border-orange-100 print:border-none print:shadow-none print:p-0 ${step === 'results' ? (isCorrect ? 'bg-green-50 border-green-200' : isWrong ? 'bg-red-50 border-red-200' : '') : ''} break-inside-avoid`}>
+                    <p className="font-semibold text-stone-800 mb-3 text-lg">
+                      {idx + 1}. {q.text}
+                      {step !== 'results' && <span className="ml-2 text-xs font-normal text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full print:hidden uppercase tracking-wider">{q.type}</span>}
+                    </p>
+                    
+                    <div className="space-y-2 pl-4">
+                      {q.options.map((opt, optIdx) => {
+                        const letter = ['A', 'B', 'C', 'D'][optIdx];
+                        const isSelected = userAnswer === letter;
+                        const isCorrectOption = q.correctOption === letter;
+
+                        return (
+                          <label key={optIdx} className={`flex items-start gap-3 cursor-pointer group ${!isInteractive ? 'cursor-default' : ''}`}>
+                            <div className="relative flex items-center pt-1">
+                              {/* MODE IMPRESSIÓ: CERCLE BUIT */}
+                              <span className="hidden print:inline-block w-5 h-5 border-2 border-black rounded-full mr-2"></span>
+                              
+                              {/* MODE PANTALLA: RADIO BUTTON */}
+                              <input 
+                                type="radio" 
+                                name={q.id} 
+                                className="print:hidden w-5 h-5 text-amber-600 focus:ring-amber-500 border-stone-300"
+                                checked={isSelected}
+                                onChange={() => isInteractive && step !== 'results' && handleAnswerSelect(q.id, letter)}
+                                disabled={step === 'results'}
+                              />
+                            </div>
+                            
+                            <div className="flex-1">
+                              <span className="font-bold mr-2 text-stone-600">{letter})</span>
+                              <span className={`
+                                ${step === 'results' && isCorrectOption ? 'font-bold text-emerald-700' : ''}
+                                ${step === 'results' && isSelected && !isCorrectOption ? 'text-red-600 line-through' : 'text-stone-700'}
+                              `}>
+                                {opt}
+                              </span>
+                              {step === 'results' && isCorrectOption && <span className="ml-2 text-emerald-600 text-sm print:hidden">✔ (Correcta)</span>}
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* BOTÓ DE CORRECCIÓ */}
+            {step === 'interactive' && (
+              <div className="mt-8 flex justify-center no-print">
+                <Button 
+                  onClick={calculateScore} 
+                  variant="success" 
+                  className="w-full md:w-1/3 py-3 text-lg"
+                  disabled={Object.keys(userAnswers).length < generatedData?.questions.length}
+                >
+                  Enviar Respostes i Corregir
+                </Button>
+              </div>
+            )}
+            
+            {step === 'interactive' && Object.keys(userAnswers).length < generatedData?.questions.length && (
+              <p className="text-center text-sm text-stone-500 mt-2 no-print">
+                Respon totes les preguntes per enviar.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ESTILS PER A IMPRESSIÓ */}
+      <style>{`
+        @media print {
+          @page { margin: 2cm; size: A4; }
+          body { background: white; color: black; }
+          .no-print { display: none !important; }
+          .print\\:hidden { display: none !important; }
+          .print\\:block { display: block !important; }
+          .print\\:text-black { color: black !important; }
+          .print\\:bg-white { background: white !important; }
+          .print\\:p-0 { padding: 0 !important; }
+          .print\\:m-0 { margin: 0 !important; }
+          .print\\:shadow-none { box-shadow: none !important; }
+          .print\\:rounded-none { border-radius: 0 !important; }
+          .print\\:border-none { border: none !important; }
+          input[type="radio"] { display: none; }
+        }
+      `}</style>
+    </div>
+  );
+}
