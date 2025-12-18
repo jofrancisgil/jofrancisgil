@@ -49,20 +49,45 @@
             width: auto;
         }
 
+        /* Contenidor del menú per gestionar l'espaiat */
+        .menu {
+            display: flex;
+            align-items: center;
+            gap: 8px; /* Espai entre els botons del menú */
+        }
+
         .menu a {
             text-decoration: none;
             color: #555;
-            margin-left: 20px;
-            /* Tipografia igual a la resta (heretada del body), sense pes extra */
+            padding: 10px 18px; /* Més cos per fer efecte botó */
+            border-radius: 50px; /* Vores arrodonides tipus pastilla */
             font-weight: normal; 
             font-family: inherit;
-            transition: color 0.3s;
-            font-size: 1.05em; /* Un pèl més gran per llegibilitat, però mateixa font */
+            transition: all 0.3s ease;
+            font-size: 1.05em; 
+            display: flex;
+            align-items: center;
+            gap: 8px; /* Espai entre icona i text */
         }
 
+        /* Estil de les icones del menú */
+        .menu a i {
+            font-size: 0.9em;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        /* Efecte Hover millorat */
         .menu a:hover {
             color: #2b5876; /* Color accentuat */
-            text-decoration: underline; /* Subratllat suau al passar per sobre */
+            background-color: #f0f4f8; /* Fons molt suau al passar el ratolí */
+            transform: translateY(-2px); /* Petit efecte d'elevació */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Ombra subtil */
+        }
+
+        .menu a:hover i {
+            opacity: 1; /* Icona més visible al hover */
+            color: #2b5876;
         }
 
         /* Contingut Principal */
@@ -235,9 +260,13 @@
             .menu {
                 flex-wrap: wrap;
                 justify-content: center;
+                gap: 10px; /* Més espai en mòbil */
+                width: 100%;
             }
             .menu a {
-                margin: 0 10px;
+                margin: 0;
+                background-color: #fff; /* Fons blanc en mòbil per separar */
+                border: 1px solid #eee;
             }
             h1 { font-size: 2em; }
         }
@@ -252,11 +281,11 @@
                 <img src="img/logo-nofons.png" alt="Logo Repositori">
             </a>
             <div class="menu">
-                <a href="matematiques.html">Matemàtiques</a>
-                <a href="llengues.html">Llengües</a>
-                <a href="medi.html">Medi</a>
-                <a href="jocs.html">Jocs</a>
-                <a href="eines.html">Eines</a>
+                <a href="matematiques.html"><i class="fas fa-calculator"></i> Matemàtiques</a>
+                <a href="llengues.html"><i class="fas fa-comments"></i> Llengües</a>
+                <a href="medi.html"><i class="fas fa-globe-europe"></i> Medi</a>
+                <a href="jocs.html"><i class="fas fa-gamepad"></i> Jocs</a>
+                <a href="eines.html"><i class="fas fa-tools"></i> Eines</a>
             </div>
         </div>
     </nav>
