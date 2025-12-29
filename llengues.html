@@ -15,7 +15,87 @@
         .hidden-lang { display: none; }
         .hidden-app { display: none !important; }
 
-        /* Estils App Verbs */
+        /* --- ESTILS DE TARGETES (Importats i adaptats de index.html) --- */
+        .card {
+            border-radius: 15px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+            color: white !important; /* Text blanc forçat per als gradients foscos */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 240px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Ajust per a icones Lucide dins les targetes */
+        .card-icon svg {
+            width: 48px;
+            height: 48px;
+        }
+
+        .card h3 {
+            margin: 10px 0;
+            font-size: 1.5em;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .card p {
+            font-size: 1em;
+            line-height: 1.4;
+            opacity: 0.95;
+            margin: 0;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* --- GRADIENTS --- */
+        
+        /* Català (Tons Vermells/Roses) */
+        .grad-cat-1 { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); }
+        .grad-cat-2 { background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%); }
+
+        /* Castellano (Tons Blaus/Cian) */
+        .grad-esp-1 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+
+        /* English (Mix Union Jack: Blau Marí, Vermell Fort, Blanc/Gris) */
+        .grad-eng-blue { background: linear-gradient(135deg, #012169 0%, #4facfe 100%); }
+        .grad-eng-red { background: linear-gradient(135deg, #C8102E 0%, #ff9a9e 100%); }
+        /* Gradient clar per a la varietat, amb text fosc */
+        .grad-eng-white { background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); }
+        
+        /* Classes auxiliars per targetes amb fons clar */
+        .card-light { color: #333 !important; }
+        .card-light .card-icon { color: #444 !important; text-shadow: none; }
+        .card-light h3 { text-shadow: none; }
+
+
+        /* --- ESTILS APP VERBS (Mantinguem la lògica) --- */
         .verb-app-wrapper {
             --union-blue: #012169; --union-red: #C8102E; --bg-gradient: linear-gradient(135deg, #f0f4f8 0%, #dbeafe 100%); --radius: 16px;
             font-family: 'Poppins', sans-serif; background: var(--bg-gradient); padding: 20px; border-radius: var(--radius);
@@ -50,158 +130,102 @@
     <main class="flex-grow py-12">
         <div class="max-w-6xl mx-auto px-4 mb-10 text-center">
             <div class="inline-flex bg-white p-1 rounded-full shadow-sm border">
-                <button onclick="showLanguage('cat')" id="btn-cat" class="px-6 py-2 rounded-full font-bold transition bg-blue-600 text-white">Català</button>
+                <!-- Botó Català inicia en Vermell -->
+                <button onclick="showLanguage('cat')" id="btn-cat" class="px-6 py-2 rounded-full font-bold transition bg-red-600 text-white shadow-md">Català</button>
                 <button onclick="showLanguage('esp')" id="btn-esp" class="px-6 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-50 transition">Castellano</button>
                 <button onclick="showLanguage('eng')" id="btn-eng" class="px-6 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-50 transition">English</button>
             </div>
         </div>
 
+        <!-- SECCIÓ CATALÀ (Tons Vermells) -->
         <div id="content-cat" class="lang-content max-w-6xl mx-auto px-4">
-            <div class="flex items-center gap-3 mb-8 pb-2 border-b">
-                <div class="w-2 h-8 bg-yellow-500 rounded-full"></div>
+            <div class="flex items-center gap-3 mb-8 pb-2 border-b border-red-100">
+                <div class="w-2 h-8 bg-red-600 rounded-full"></div>
                 <h3 class="text-2xl font-bold text-gray-800">Recursos de Català</h3>
             </div>
             
             <div class="grid md:grid-cols-3 gap-6">
-                <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-yellow-200 ring-2 ring-yellow-50 flex flex-col h-full group">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full">Lectura</span>
-                        <i data-lucide="book-open" class="text-yellow-600 w-8 h-8 group-hover:scale-110 transition"></i>
-                    </div>
-                    <h4 class="font-bold text-lg mb-2">Comprensions Lectores</h4>
-                    <p class="text-gray-600 text-sm mb-6 flex-grow">Llegeix textos interessants i respon les preguntes per comprovar què has entès.</p>
-                    <a href="comprensions.html" class="block w-full text-center bg-yellow-500 text-white py-2 rounded-lg font-bold hover:bg-yellow-600 transition shadow-md mt-auto">
-                        Llegir i Comprendre 📖
-                    </a>
-                </div>
+                <!-- Targeta: Ordena la frase -->
+                <a href="frasescat.html" class="card grad-cat-2">
+                    <div class="card-icon"><i data-lucide="align-left"></i></div>
+                    <h3>Ordena la frase</h3>
+                    <p>Joc interactiu per ordenar paraules i formar frases correctes.</p>
+                </a>
 
-                <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-purple-200 ring-2 ring-purple-50 flex flex-col h-full group">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full">Gramàtica</span>
-                        <i data-lucide="align-left" class="text-purple-600 w-8 h-8 group-hover:scale-110 transition"></i>
-                    </div>
-                    <h4 class="font-bold text-lg mb-2">Ordena la frase</h4>
-                    <p class="text-gray-600 text-sm mb-6 flex-grow">Joc interactiu per ordenar paraules i formar frases correctes.</p>
-                    <a href="frasescat.html" class="block w-full text-center bg-purple-500 text-white py-2 rounded-lg font-bold hover:bg-purple-600 transition shadow-md mt-auto">
-                        Jugar Ara 📝
-                    </a>
-                </div>
-
-                <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-teal-200 ring-2 ring-teal-50 flex flex-col h-full group">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="bg-teal-100 text-teal-800 text-xs font-bold px-3 py-1 rounded-full">IA & Eines</span>
-                        <i data-lucide="bot" class="text-teal-600 w-8 h-8 group-hover:scale-110 transition"></i>
-                    </div>
-                    <h4 class="font-bold text-lg mb-2">Generador de Comprensions</h4>
-                    <p class="text-gray-600 text-sm mb-6 flex-grow">Crea textos i preguntes de comprensió automàticament amb IA.</p>
-                    <a href="https://gemini.google.com/share/1ccab9f21b39" target="_blank" class="block w-full text-center bg-teal-500 text-white py-2 rounded-lg font-bold hover:bg-teal-600 transition shadow-md mt-auto">
-                        Generar Ara 🤖
-                    </a>
-                </div>
+                <!-- Targeta: Generador Comprensions -->
+                <a href="https://gemini.google.com/share/1ccab9f21b39" target="_blank" class="card grad-cat-1">
+                    <div class="card-icon"><i data-lucide="bot"></i></div>
+                    <h3>Generador Comprensions</h3>
+                    <p>Crea textos i preguntes de comprensió automàticament amb IA.</p>
+                </a>
             </div>
         </div>
 
+        <!-- SECCIÓ CASTELLANO (Tons Blavosos) -->
         <div id="content-esp" class="lang-content max-w-6xl mx-auto px-4 hidden-lang">
-            <div class="flex items-center gap-3 mb-8 pb-2 border-b">
-                <div class="w-2 h-8 bg-red-500 rounded-full"></div>
+            <div class="flex items-center gap-3 mb-8 pb-2 border-b border-blue-100">
+                <div class="w-2 h-8 bg-blue-600 rounded-full"></div>
                 <h3 class="text-2xl font-bold text-gray-800">Recursos de Castellano</h3>
             </div>
             
             <div class="grid md:grid-cols-3 gap-6">
-                <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-red-200 ring-2 ring-red-50 flex flex-col h-full group">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full">Lectura</span>
-                        <i data-lucide="book-open" class="text-red-600 w-8 h-8 group-hover:scale-110 transition"></i>
-                    </div>
-                    <h4 class="font-bold text-lg mb-2">Comprensiones Lectoras</h4>
-                    <p class="text-gray-600 text-sm mb-6 flex-grow">Lee textos interesantes y responde a las preguntas para comprobar qué has entendido.</p>
-                    <a href="comprensiones.html" class="block w-full text-center bg-red-500 text-white py-2 rounded-lg font-bold hover:bg-red-600 transition shadow-md mt-auto">
-                        Leer y Comprender 📖
-                    </a>
-                </div>
-
-                <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-orange-200 ring-2 ring-orange-50 flex flex-col h-full group">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1 rounded-full">IA & Herramientas</span>
-                        <i data-lucide="sparkles" class="text-orange-600 w-8 h-8 group-hover:scale-110 transition"></i>
-                    </div>
-                    <h4 class="font-bold text-lg mb-2">Generador de Comprensiones</h4>
-                    <p class="text-gray-600 text-sm mb-6 flex-grow">Crea textos y preguntas de comprensión automáticamente con IA.</p>
-                    <a href="https://gemini.google.com/share/710efe33794b" target="_blank" class="block w-full text-center bg-orange-500 text-white py-2 rounded-lg font-bold hover:bg-orange-600 transition shadow-md mt-auto">
-                        Generar Ahora ✨
-                    </a>
-                </div>
+                <!-- Targeta: Generador Comprensions -->
+                <a href="https://gemini.google.com/share/710efe33794b" target="_blank" class="card grad-esp-1">
+                    <div class="card-icon"><i data-lucide="sparkles"></i></div>
+                    <h3>Generador Comprensions</h3>
+                    <p>Crea textos y preguntas de comprensión automáticamente con IA.</p>
+                </a>
             </div>
         </div>
 
+        <!-- SECCIÓ ENGLISH (Gradients Blancs, Vermells i Blavosos) -->
         <div id="content-eng" class="lang-content max-w-6xl mx-auto px-4 hidden-lang">
             <div id="eng-resources-list">
-                <div class="flex items-center gap-3 mb-8 pb-2 border-b">
-                    <div class="w-2 h-8 bg-blue-800 rounded-full"></div>
+                <div class="flex items-center gap-3 mb-8 pb-2 border-b border-blue-100">
+                    <!-- Barra decorativa amb gradient Union Jack -->
+                    <div class="w-2 h-8 bg-gradient-to-b from-blue-800 via-red-600 to-blue-800 rounded-full"></div>
                     <h3 class="text-2xl font-bold text-gray-800">English Resources</h3>
                 </div>
+                
                 <div class="grid md:grid-cols-3 gap-6">
-                    <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-blue-200 ring-2 ring-blue-50 flex flex-col h-full group">
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">Grammar</span>
-                            <i class="fas fa-gamepad text-purple-600 text-xl group-hover:scale-110 transition"></i>
-                        </div>
-                        <h4 class="font-bold text-lg mb-2">Irregular Verbs Master</h4>
-                        <p class="text-gray-600 text-sm mb-4 flex-grow">Interactive test to practice irregular verbs. UK Edition.</p>
-                        <button onclick="openVerbApp()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-md mt-auto">Start Test 🚀</button>
+                    <!-- Targeta: Irregular Verbs (Botó que obre l'app) - BLAU -->
+                    <div onclick="openVerbApp()" class="card grad-eng-blue">
+                        <div class="card-icon"><i class="fas fa-gamepad"></i></div>
+                        <h3>Irregular Verbs Master</h3>
+                        <p>Interactive test to practice irregular verbs. UK Edition.</p>
                     </div>
 
-                    <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-pink-200 ring-2 ring-pink-50 flex flex-col h-full group">
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="bg-pink-100 text-pink-800 text-xs font-bold px-3 py-1 rounded-full">Vocabulary</span>
-                            <i data-lucide="message-circle-off" class="text-pink-600 w-8 h-8 group-hover:scale-110 transition"></i>
-                        </div>
-                        <h4 class="font-bold text-lg mb-2">Taboo (Vocabulary Game)</h4>
-                        <p class="text-gray-600 text-sm mb-4 flex-grow">Describe words without saying the forbidden ones. Fun speaking practice!</p>
-                        <a href="tabooeng.html" class="block w-full text-center bg-pink-500 text-white py-2 rounded-lg font-bold hover:bg-pink-600 transition shadow-md mt-auto">
-                            Play Taboo 🤐
-                        </a>
-                    </div>
+                    <!-- Targeta: Taboo - VERMELL -->
+                    <a href="tabooeng.html" class="card grad-eng-red">
+                        <div class="card-icon"><i data-lucide="message-circle-off"></i></div>
+                        <h3>Taboo Game</h3>
+                        <p>Describe words without saying the forbidden ones. Fun speaking practice!</p>
+                    </a>
 
-                    <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-indigo-200 ring-2 ring-indigo-50 flex flex-col h-full group">
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full">Vocabulary</span>
-                            <i data-lucide="images" class="text-indigo-600 w-8 h-8 group-hover:scale-110 transition"></i>
-                        </div>
-                        <h4 class="font-bold text-lg mb-2">Vocabulary Memory</h4>
-                        <p class="text-gray-600 text-sm mb-4 flex-grow">Match pictures with words. Topics: Clothes, Weather, Animals & more.</p>
-                        <a href="memory-pictures.html" class="block w-full text-center bg-indigo-500 text-white py-2 rounded-lg font-bold hover:bg-indigo-600 transition shadow-md mt-auto">
-                            Play Memory 🖼️
-                        </a>
-                    </div>
+                    <!-- Targeta: Memory - BLANC/GRIS (Union Jack White) -->
+                    <a href="memory-pictures.html" class="card grad-eng-white card-light">
+                        <div class="card-icon"><i data-lucide="images"></i></div>
+                        <h3>Vocabulary Memory</h3>
+                        <p>Match pictures with words. Topics: Clothes, Weather, Animals & more.</p>
+                    </a>
 
-                    <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-red-200 ring-2 ring-red-50 flex flex-col h-full group">
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full">Writing</span>
-                            <i data-lucide="move" class="text-red-600 w-8 h-8 group-hover:scale-110 transition"></i>
-                        </div>
-                        <h4 class="font-bold text-lg mb-2">Scrambled Sentences</h4>
-                        <p class="text-gray-600 text-sm mb-4 flex-grow">Unscramble the words to make correct sentences. Teacher can set the text!</p>
-                        <a href="fraseseng.html" class="block w-full text-center bg-red-600 text-white py-2 rounded-lg font-bold hover:bg-red-700 transition shadow-md mt-auto">
-                            Play Now 🇬🇧
-                        </a>
-                    </div>
+                    <!-- Targeta: Scrambled Sentences - BLAU -->
+                    <a href="fraseseng.html" class="card grad-eng-blue">
+                        <div class="card-icon"><i data-lucide="move"></i></div>
+                        <h3>Scrambled Sentences</h3>
+                        <p>Unscramble the words to make correct sentences. Teacher can set the text!</p>
+                    </a>
 
-                    <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-emerald-200 ring-2 ring-emerald-50 flex flex-col h-full group">
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">AI & Tools</span>
-                            <i data-lucide="wand-2" class="text-emerald-600 w-8 h-8 group-hover:scale-110 transition"></i>
-                        </div>
-                        <h4 class="font-bold text-lg mb-2">Reading Generator</h4>
-                        <p class="text-gray-600 text-sm mb-4 flex-grow">Automatically create reading texts and questions with AI.</p>
-                        <a href="https://gemini.google.com/share/710efe33794b" target="_blank" class="block w-full text-center bg-emerald-500 text-white py-2 rounded-lg font-bold hover:bg-emerald-600 transition shadow-md mt-auto">
-                            Generate Now ✨
-                        </a>
-                    </div>
-
+                    <!-- Targeta: Reading Generator - VERMELL -->
+                    <a href="https://gemini.google.com/share/710efe33794b" target="_blank" class="card grad-eng-red">
+                        <div class="card-icon"><i data-lucide="wand-2"></i></div>
+                        <h3>Reading Generator</h3>
+                        <p>Automatically create reading texts and questions with AI.</p>
+                    </a>
                 </div>
             </div>
 
+            <!-- App de Verbs Irregulars (Amagada per defecte) -->
             <div id="irregular-verbs-app" class="verb-app-wrapper hidden-app">
                 <div id="setup-screen" class="screen active">
                     <div class="text-6xl mb-4">🇬🇧</div><h1>Irregular Verbs</h1><p>Select number of verbs:</p>
@@ -228,16 +252,23 @@
     <script>
         lucide.createIcons();
 
-        // Navegació Pestanyes
+        // Navegació Pestanyes amb colors dinàmics
         function showLanguage(langId) {
             document.querySelectorAll('.lang-content').forEach(el => el.classList.add('hidden-lang'));
             document.getElementById('content-' + langId).classList.remove('hidden-lang');
             
-            // Reset botons
+            // Definim les classes actives segons l'idioma
+            const activeClasses = {
+                'cat': "bg-red-600 text-white shadow-md",
+                'esp': "bg-blue-600 text-white shadow-md",
+                'eng': "bg-gradient-to-r from-blue-800 to-red-700 text-white shadow-md"
+            };
+
+            // Reset i aplicar classes
             ['cat','esp','eng'].forEach(id => {
                 const btn = document.getElementById('btn-'+id);
                 if(id === langId) {
-                    btn.className = "px-6 py-2 rounded-full font-bold transition bg-blue-600 text-white";
+                    btn.className = "px-6 py-2 rounded-full font-bold transition " + activeClasses[id];
                 } else {
                     btn.className = "px-6 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-50 transition";
                 }
