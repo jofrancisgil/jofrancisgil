@@ -6,77 +6,186 @@
     <title>Medi - Jo Recursos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Inter', sans-serif; } .brand-font { font-family: 'Fredoka', sans-serif; }</style>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600&family=Inter:wght@300;400;600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .brand-font { font-family: 'Fredoka', sans-serif; }
+
+        /* --- ESTILS DE TARGETES (Coherents amb tot el lloc) --- */
+        .card {
+            border-radius: 15px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+            color: white !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 240px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .card-icon svg {
+            width: 48px;
+            height: 48px;
+        }
+
+        .card h3 {
+            margin: 10px 0;
+            font-size: 1.5em;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .card p {
+            font-size: 1em;
+            line-height: 1.4;
+            opacity: 0.95;
+            margin: 0;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* --- GRADIENTS MEDI (Verds i Terracis) --- */
+        
+        /* Verd bosc profund */
+        .grad-medi-forest { background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%); }
+        
+        /* Terracota / Terra */
+        .grad-medi-earth { background: linear-gradient(135deg, #e07a5f 0%, #d94e35 100%); }
+        
+        /* Oliva / Verd suau */
+        .grad-medi-olive { background: linear-gradient(135deg, #606c38 0%, #283618 100%); }
+        
+        /* Sorra / Ocre */
+        .grad-medi-sand { background: linear-gradient(135deg, #f4a261 0%, #e76f51 100%); }
+        
+        /* Marró fusta */
+        .grad-medi-wood { background: linear-gradient(135deg, #bc6c25 0%, #dda15e 100%); }
+
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
-    
+
+    <!-- Navegació -->
     <nav class="bg-white shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 flex justify-between h-20 items-center">
-            <a href="index.html" class="flex items-center gap-2 text-gray-600 hover:text-green-600 transition">
-                <i class="fas fa-arrow-left"></i> Tornar a l'Inici
+            <!-- Logo / Enllaç Inici -->
+            <a href="index.html" class="logo flex items-center">
+                 <img src="img/logo-nofons.png" alt="Logo" class="h-16 w-auto mr-2">
             </a>
-            <span class="text-2xl font-bold text-green-900 brand-font">Medi</span>
+
+            <!-- Menú Principal -->
+            <div class="hidden md:flex items-center gap-2">
+                <a href="matematiques.html" class="px-5 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-100 transition flex items-center gap-2">
+                    <i class="fas fa-calculator"></i> Matemàtiques
+                </a>
+                <a href="llengues.html" class="px-5 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-100 transition flex items-center gap-2">
+                    <i class="fas fa-comments"></i> Llengües
+                </a>
+                <a href="medi.html" class="px-5 py-2 rounded-full font-bold transition bg-emerald-700 text-white shadow-md flex items-center gap-2">
+                    <i class="fas fa-globe-europe"></i> Medi
+                </a>
+                <a href="jocs.html" class="px-5 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-100 transition flex items-center gap-2">
+                    <i class="fas fa-gamepad"></i> Jocs
+                </a>
+                <a href="gestio.html" class="px-5 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-100 transition flex items-center gap-2">
+                    <i class="fas fa-tools"></i> Eines
+                </a>
+            </div>
+            
+            <div class="md:hidden text-gray-600">
+                <i class="fas fa-bars text-2xl"></i>
+            </div>
         </div>
     </nav>
 
     <main class="flex-grow py-12">
-        <div class="max-w-6xl mx-auto px-4 text-center mb-10">
-            <h1 class="text-4xl font-bold text-green-900 mb-4">Coneixement del Medi</h1>
-            <p class="text-gray-600">Explora la natura, la geografia i la societat.</p>
-        </div>
-
         <div class="max-w-6xl mx-auto px-4">
-            <div class="grid md:grid-cols-3 gap-6">
+            
+            <!-- Encapçalament de Pàgina -->
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-800 to-amber-700 mb-4">
+                    <i class="fas fa-globe-europe mr-2 text-emerald-700"></i> Recursos de Medi
+                </h1>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Geografia, ciències socials i naturals. Descobreix el món que t'envolta.
+                </p>
+            </div>
+
+            <!-- Graella de Recursos -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 
-                <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-green-200 ring-2 ring-green-50 group flex flex-col h-full">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full">Catalunya</span>
-                        <i class="fas fa-map-marked-alt text-green-600 text-2xl group-hover:scale-110 transition"></i>
-                    </div>
-                    <h4 class="font-bold text-lg mb-2">Joc de les Comarques</h4>
-                    <p class="text-gray-600 text-sm mb-4 flex-grow">Posa a prova el teu coneixement sobre les comarques i capitals de Catalunya.</p>
-                    
-                    <a href="comarques.html" class="block w-full text-center bg-green-600 text-white py-2 rounded-lg font-bold hover:bg-green-700 transition shadow-md mt-auto">
-                        Jugar Ara 🎮
-                    </a>
-                </div>
+                <!-- Comarques de Catalunya -->
+                <a href="comarques.html" class="card grad-medi-forest">
+                    <div class="card-icon"><i class="fas fa-map-marked-alt"></i></div>
+                    <h3>Comarques</h3>
+                    <p>Situa i aprèn les comarques de Catalunya al mapa interactiu.</p>
+                </a>
 
-                <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-green-200 ring-2 ring-green-50 group flex flex-col h-full">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full">Espanya</span>
-                        <i class="fas fa-flag text-green-600 text-2xl group-hover:scale-110 transition"></i>
-                    </div>
-                    <h4 class="font-bold text-lg mb-2">Capitals d'Espanya</h4>
-                    <p class="text-gray-600 text-sm mb-4 flex-grow">Repassa les capitals de totes les Comunitats Autònomes.</p>
-                    
-                    <a href="capitalsespanya.html" class="block w-full text-center bg-green-600 text-white py-2 rounded-lg font-bold hover:bg-green-700 transition shadow-md mt-auto">
-                        Jugar Ara 🇪🇸
-                    </a>
-                </div>
+                <!-- Capitals d'Espanya -->
+                <a href="capitalsespanya.html" class="card grad-medi-earth">
+                    <div class="card-icon"><i class="fas fa-city"></i></div>
+                    <h3>Capitals d'Espanya</h3>
+                    <p>Coneixes les capitals de les comunitats autònomes?</p>
+                </a>
 
-                <div class="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition border-green-200 ring-2 ring-green-50 group flex flex-col h-full">
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full">Europa</span>
-                        <i class="fas fa-globe-europe text-green-600 text-2xl group-hover:scale-110 transition"></i>
-                    </div>
-                    <h4 class="font-bold text-lg mb-2">Capitals de la UE</h4>
-                    <p class="text-gray-600 text-sm mb-4 flex-grow">Demostra que coneixes els països i capitals de la Unió Europea.</p>
-                    
-                    <a href="capitalseuropa.html" class="block w-full text-center bg-green-600 text-white py-2 rounded-lg font-bold hover:bg-green-700 transition shadow-md mt-auto">
-                        Jugar Ara 🇪🇺
-                    </a>
-                </div>
+                <!-- Capitals d'Europa -->
+                <a href="capitalseuropa.html" class="card grad-medi-olive">
+                    <div class="card-icon"><i class="fas fa-globe-americas"></i></div>
+                    <h3>Capitals d'Europa</h3>
+                    <p>Posa a prova els teus coneixements sobre la geografia europea.</p>
+                </a>
+
+                <!-- Eina extra (si escau) -->
+                <!-- Pots afegir-ne més aquí en el futur -->
 
             </div>
         </div>
     </main>
 
-    <footer class="bg-white border-t py-8 mt-auto">
-        <div class="max-w-6xl mx-auto px-4 text-center text-sm text-gray-500">
-            <p>&copy; 2025 Jo Recursos.</p>
+    <!-- Footer Simple -->
+    <footer class="bg-gradient-to-r from-emerald-50 to-stone-50 border-t border-gray-200 mt-20 py-10">
+        <div class="max-w-4xl mx-auto text-center px-4">
+            <p class="text-gray-600 mb-4 font-medium">Creat per Jo Francis Gil</p>
+            <div class="flex justify-center items-center gap-2 opacity-80">
+                <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+                    <img alt="Llicència de Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" />
+                </a>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">
+                Obra sota llicència <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" class="text-emerald-700 hover:underline">CC BY-NC-SA 4.0</a>.
+            </p>
         </div>
     </footer>
 
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>
